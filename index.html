@@ -1,14 +1,658 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hunter">
+<meta name="theme-color" content="#1f3a5f">
 <title>Hunter</title>
-</head>
+<style>
+:root{
+  --blu:#1f3a5f; --blu2:#2c5282; --sfondo:#f2f4f7; --card:#ffffff; --testo:#1a202c;
+  --grigio:#6b7280; --bordo:#d9dee5; --verde:#2f855a; --rosso:#c53030;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--sfondo);color:var(--testo);font-size:16px;line-height:1.4;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+[hidden]{display:none !important;}
+button{font:inherit;cursor:pointer;}
+input,select,textarea{font:inherit;font-size:16px;width:100%;padding:10px 12px;border:1px solid var(--bordo);border-radius:10px;background:#fff;color:var(--testo);}
+textarea{min-height:90px;resize:vertical;}
+label{display:block;font-size:14px;font-weight:600;color:#374151;margin-bottom:12px;}
+label input,label select,label textarea{margin-top:4px;font-weight:400;}
+label.check{display:flex;align-items:center;gap:10px;font-size:16px;}
+label.check input{width:22px;height:22px;margin:0;flex-shrink:0;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font-weight:600;background:var(--blu);color:#fff;}
+.btn.secondario{background:#e5e9f0;color:var(--blu);}
+.btn.pericolo{background:var(--rosso);color:#fff;}
+.btn.piccolo{padding:7px 10px;font-size:14px;border-radius:8px;}
+.btn.largo{width:100%;}
+.btn:disabled{opacity:.45;}
 
+/* ---------- Accesso ---------- */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;}
+.box-login{width:100%;max-width:380px;background:var(--card);border-radius:16px;padding:28px 20px;box-shadow:0 4px 20px rgba(0,0,0,.08);text-align:center;}
+.box-login h1{margin:0 0 4px;color:var(--blu);font-size:32px;}
+.box-login p{margin:0 0 20px;color:var(--grigio);font-size:14px;}
+.box-login label{text-align:left;}
+.errore{color:var(--rosso);font-size:14px;min-height:20px;margin:8px 0;}
+
+/* ---------- Intestazione ---------- */
+header{position:sticky;top:0;z-index:10;background:var(--blu);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:8px;}
+header h1{font-size:20px;margin:0;flex:1;}
+header h1 small{font-size:12px;font-weight:400;opacity:.7;}
+header button{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:14px;}
+main{max-width:720px;margin:0 auto;padding:16px 16px calc(90px + env(safe-area-inset-bottom));}
+h2{font-size:20px;margin:4px 0 14px;color:var(--blu);}
+h3{font-size:16px;margin:18px 0 8px;color:#374151;}
+
+/* ---------- Barra in basso ---------- */
+nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid var(--bordo);display:flex;padding-bottom:env(safe-area-inset-bottom);}
+nav button{flex:1;border:none;background:none;padding:8px 2px 10px;font-size:12px;color:var(--grigio);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
+nav button .ico{font-size:20px;line-height:1;}
+nav button.attivo{color:var(--blu);font-weight:700;}
+
+/* ---------- Schede lead ---------- */
+.card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-wrap:anywhere;}
+.card.cliccabile{cursor:pointer;}
+.card .titolo{font-weight:700;font-size:16px;}
+.card .sotto{color:var(--grigio);font-size:14px;margin-top:2px;}
+.riga-badge{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:#e5e9f0;color:#374151;}
+.badge.alta{background:#fed7d7;color:var(--rosso);}
+.badge.media{background:#feebc8;color:#9c4221;}
+.badge.bassa{background:#e2e8f0;color:#4a5568;}
+.badge.fase{background:#dbeafe;color:#1e40af;}
+.badge.ok{background:#c6f6d5;color:var(--verde);}
+
+/* ---------- Dashboard ---------- */
+.griglia{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.numero{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.numero .val{font-size:28px;font-weight:800;color:var(--blu);}
+.numero .lab{font-size:13px;color:var(--grigio);}
+.barra-riga{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px;}
+.barra-riga .nome{width:118px;flex-shrink:0;}
+.barra-riga .barra{flex:1;background:#e5e9f0;border-radius:6px;height:12px;overflow:hidden;}
+.barra-riga .barra span{display:block;height:100%;background:var(--blu2);}
+.barra-riga .cont{width:32px;text-align:right;font-weight:700;}
+
+/* ---------- Archivio ---------- */
+.filtri{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.filtri .intero{grid-column:1 / -1;}
+.barra-azioni{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--grigio);}
+
+/* ---------- Pipeline ---------- */
+details.colonna{background:var(--card);border-radius:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+details.colonna summary{padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;}
+details.colonna summary::-webkit-details-marker{display:none;}
+details.colonna .contenuto{padding:0 10px 6px;}
+details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--bordo);}
+.frecce{display:flex;gap:8px;margin-top:10px;}
+.frecce .btn{flex:1;}
+.vuoto{color:var(--grigio);font-size:14px;padding:8px 4px 12px;}
+
+/* ---------- Scheda (finestra dal basso) ---------- */
+#modale{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;}
+.foglio{background:var(--sfondo);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));}
+.foglio-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.foglio-testa h2{margin:0;flex:1;overflow-wrap:anywhere;}
+.azioni-scheda{display:flex;gap:10px;margin-top:6px;}
+.azioni-scheda .btn{flex:1;}
+.info{font-size:13px;color:var(--grigio);margin-bottom:12px;}
+.info a{color:var(--blu2);font-weight:600;}
+
+/* ---------- Avvisi ---------- */
+#avviso{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:30;max-width:480px;margin:0 auto;padding:12px 16px;border-radius:10px;background:#1a202c;color:#fff;text-align:center;font-size:15px;box-shadow:0 4px 16px rgba(0,0,0,.25);}
+#avviso.errore-avviso{background:var(--rosso);}
+.caricamento{text-align:center;color:var(--grigio);padding:24px;}
+</style>
+</head>
 <body>
 
-<h1>Hunter</h1>
+<!-- ================= ACCESSO ================= -->
+<div id="login">
+  <form class="box-login" id="formLogin" autocomplete="off">
+    <h1>Hunter</h1>
+    <p>Acquisizione proprietari immobiliari</p>
+    <label>Password
+      <input type="password" id="loginPassword" autocomplete="current-password" required>
+    </label>
+    <div class="errore" id="loginErrore"></div>
+    <button type="submit" class="btn largo" id="btnAccedi">Accedi</button>
+  </form>
+</div>
 
-<p>Sistema di acquisizione proprietari immobiliari</p>
+<!-- ================= APP ================= -->
+<div id="app" hidden>
+  <header>
+    <h1>Hunter <small>v0.8</small></h1>
+    <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
+    <button type="button" id="btnEsci">Esci</button>
+  </header>
 
+  <main>
+    <section id="sez-dashboard"></section>
+
+    <section id="sez-nuovo" hidden>
+      <h2>Nuovo Lead</h2>
+      <form id="formNuovo" class="card" autocomplete="off"></form>
+    </section>
+
+    <section id="sez-archivio" hidden>
+      <h2>Archivio Lead</h2>
+      <div class="filtri">
+        <input class="intero" type="search" id="cerca" placeholder="Cerca nome, comune, gruppo, note…">
+        <select id="filtroFase"></select>
+        <select id="filtroSegnale"></select>
+        <select id="filtroPriorita" class="intero"></select>
+      </div>
+      <div class="barra-azioni">
+        <span id="contaArchivio"></span>
+        <button type="button" class="btn secondario piccolo" id="btnExcel">⬇ Esporta Excel</button>
+      </div>
+      <div id="listaArchivio"></div>
+    </section>
+
+    <section id="sez-pipeline" hidden>
+      <h2>Pipeline commerciale</h2>
+      <div id="listaPipeline"></div>
+    </section>
+  </main>
+
+  <nav>
+    <button type="button" data-sezione="dashboard" class="attivo"><span class="ico">📊</span>Dashboard</button>
+    <button type="button" data-sezione="nuovo"><span class="ico">➕</span>Nuovo</button>
+    <button type="button" data-sezione="archivio"><span class="ico">🗂️</span>Archivio</button>
+    <button type="button" data-sezione="pipeline"><span class="ico">➡️</span>Pipeline</button>
+  </nav>
+</div>
+
+<!-- ================= SCHEDA LEAD ================= -->
+<div id="modale" hidden>
+  <div class="foglio">
+    <div class="foglio-testa">
+      <h2 id="schedaTitolo">Scheda lead</h2>
+      <button type="button" class="btn secondario piccolo" id="btnChiudiScheda">✕ Chiudi</button>
+    </div>
+    <div class="info" id="schedaInfo"></div>
+    <form id="formScheda" autocomplete="off"></form>
+  </div>
+</div>
+
+<div id="avviso" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// =============================================================
+// HUNTER - app web - versione 0.8
+// =============================================================
+const API = "https://hunter-api.mvmymail.workers.dev";
+const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Altro"];
+const FASI = ["Nuovo Lead", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
+const PRIORITA = ["Alta", "Media", "Bassa"];
+const CHIAVE_MEMORIA = "hunterKey";
+
+let password = "";
+let leads = [];
+let schedaId = null;
+const fasiChiuse = new Set();
+
+// ---------------- Utilità ----------------
+function $(id) { return document.getElementById(id); }
+
+function esc(s) {
+  return String(s === undefined || s === null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function linkSicuro(u) { return /^https?:\/\//i.test(u || "") ? u : ""; }
+
+function formattaData(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function avviso(msg, errore) {
+  const a = $("avviso");
+  a.textContent = msg;
+  a.className = errore ? "errore-avviso" : "";
+  a.hidden = false;
+  clearTimeout(avviso.timer);
+  avviso.timer = setTimeout(function () { a.hidden = true; }, errore ? 4500 : 2500);
+}
+
+function opzioni(lista, selezionato, vuota) {
+  let h = vuota ? '<option value="">' + esc(vuota) + "</option>" : "";
+  return h + lista.map(function (v) {
+    return '<option value="' + esc(v) + '"' + (v === selezionato ? " selected" : "") + ">" + esc(v) + "</option>";
+  }).join("");
+}
+
+function classePriorita(p) { return p === "Alta" ? "alta" : p === "Bassa" ? "bassa" : "media"; }
+
+// ---------------- Memoria del dispositivo ----------------
+function leggiPassword() { try { return localStorage.getItem(CHIAVE_MEMORIA) || ""; } catch (e) { return ""; } }
+function salvaPassword(p) { try { localStorage.setItem(CHIAVE_MEMORIA, p); } catch (e) {} }
+function cancellaPassword() { try { localStorage.removeItem(CHIAVE_MEMORIA); } catch (e) {} }
+
+// ---------------- Collegamento al Worker ----------------
+async function api(metodo, percorso, dati) {
+  const opzioniFetch = { method: metodo, headers: { "X-Hunter-Key": password } };
+  if (dati !== undefined) {
+    opzioniFetch.headers["Content-Type"] = "application/json";
+    opzioniFetch.body = JSON.stringify(dati);
+  }
+  let res;
+  try {
+    res = await fetch(API + percorso, opzioniFetch);
+  } catch (e) {
+    throw new Error("Connessione non riuscita: controlla la connessione internet.");
+  }
+  let corpo = {};
+  try { corpo = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const err = new Error(corpo.errore || ("Errore " + res.status));
+    err.status = res.status;
+    throw err;
+  }
+  return corpo;
+}
+
+function gestisciErrore(e) {
+  if (e && e.status === 401) {
+    esci();
+    $("loginErrore").textContent = "Password non più valida: accedi di nuovo.";
+  } else {
+    avviso((e && e.message) || "Errore imprevisto", true);
+  }
+}
+
+// ---------------- Accesso / uscita ----------------
+$("formLogin").addEventListener("submit", async function (ev) {
+  ev.preventDefault();
+  const p = $("loginPassword").value;
+  if (!p) return;
+  $("btnAccedi").disabled = true;
+  $("loginErrore").textContent = "";
+  password = p;
+  try {
+    await api("GET", "/verifica");
+    salvaPassword(p);
+    $("loginPassword").value = "";
+    await entra();
+  } catch (e) {
+    password = "";
+    $("loginErrore").textContent = e.status === 401 ? "Password errata." : e.message;
+  } finally {
+    $("btnAccedi").disabled = false;
+  }
+});
+
+async function entra() {
+  $("login").hidden = true;
+  $("app").hidden = false;
+  mostraSezione("dashboard");
+  await caricaLeads();
+}
+
+function esci() {
+  cancellaPassword();
+  password = "";
+  leads = [];
+  chiudiScheda();
+  $("app").hidden = true;
+  $("login").hidden = false;
+}
+
+$("btnEsci").addEventListener("click", function () {
+  if (confirm("Vuoi uscire da Hunter su questo dispositivo?")) esci();
+});
+
+$("btnAggiorna").addEventListener("click", async function () {
+  const ok = await caricaLeads();
+  if (ok) avviso("Dati aggiornati");
+});
+
+// ---------------- Caricamento dati ----------------
+async function caricaLeads() {
+  $("sez-dashboard").innerHTML = '<div class="caricamento">Caricamento…</div>';
+  try {
+    const r = await api("GET", "/leads");
+    leads = r.leads || [];
+    renderTutto();
+    return true;
+  } catch (e) {
+    gestisciErrore(e);
+    renderTutto();
+    return false;
+  }
+}
+
+function renderTutto() {
+  renderDashboard();
+  renderArchivio();
+  renderPipeline();
+}
+
+// ---------------- Navigazione ----------------
+document.querySelectorAll("nav button").forEach(function (b) {
+  b.addEventListener("click", function () { mostraSezione(b.dataset.sezione); });
+});
+
+function mostraSezione(nome) {
+  ["dashboard", "nuovo", "archivio", "pipeline"].forEach(function (s) {
+    $("sez-" + s).hidden = s !== nome;
+  });
+  document.querySelectorAll("nav button").forEach(function (b) {
+    b.classList.toggle("attivo", b.dataset.sezione === nome);
+  });
+  window.scrollTo(0, 0);
+}
+
+// ---------------- Modulo lead (nuovo e scheda) ----------------
+function campiLeadHTML(p, l) {
+  l = l || {};
+  return '' +
+    '<label>Nome e cognome *<input id="' + p + '-nome" maxlength="200" required value="' + esc(l.nome) + '"></label>' +
+    '<label>Comune<input id="' + p + '-comune" maxlength="100" value="' + esc(l.comune) + '" placeholder="es. Sesto San Giovanni"></label>' +
+    '<label>Segnale<select id="' + p + '-segnale">' + opzioni(SEGNALI, l.segnale || "", "— scegli —") + '</select></label>' +
+    '<label>Priorità<select id="' + p + '-priorita">' + opzioni(PRIORITA, l.priorita || "Media") + '</select></label>' +
+    '<label>Fase<select id="' + p + '-fase">' + opzioni(FASI, l.fase || "Nuovo Lead") + '</select></label>' +
+    '<label>Gruppo Facebook / fonte<input id="' + p + '-gruppo" maxlength="200" value="' + esc(l.gruppo) + '"></label>' +
+    '<label>Link profilo Facebook<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://facebook.com/..."></label>' +
+    '<label class="check"><input type="checkbox" id="' + p + '-contattato"' + (l.contattato ? " checked" : "") + '> Già contattato</label>' +
+    '<label>Esito ultimo contatto<input id="' + p + '-esito" maxlength="1000" value="' + esc(l.esito) + '"></label>' +
+    '<label>Note<textarea id="' + p + '-note" maxlength="5000">' + esc(l.note) + '</textarea></label>';
+}
+
+function leggiCampi(p) {
+  let fb = $(p + "-facebookUrl").value.trim();
+  if (fb && !/^https?:\/\//i.test(fb)) fb = "https://" + fb;
+  return {
+    nome: $(p + "-nome").value.trim(),
+    comune: $(p + "-comune").value.trim(),
+    segnale: $(p + "-segnale").value,
+    priorita: $(p + "-priorita").value,
+    fase: $(p + "-fase").value,
+    gruppo: $(p + "-gruppo").value.trim(),
+    facebookUrl: fb,
+    contattato: $(p + "-contattato").checked,
+    esito: $(p + "-esito").value.trim(),
+    note: $(p + "-note").value.trim()
+  };
+}
+
+// ---------------- Nuovo lead ----------------
+function costruisciFormNuovo() {
+  $("formNuovo").innerHTML = campiLeadHTML("n", {}) +
+    '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva lead</button>';
+}
+
+$("formNuovo").addEventListener("submit", async function (ev) {
+  ev.preventDefault();
+  const dati = leggiCampi("n");
+  if (!dati.nome) { avviso("Il nome è obbligatorio", true); return; }
+  const b = $("btnSalvaNuovo");
+  b.disabled = true;
+  try {
+    const r = await api("POST", "/leads", dati);
+    leads.unshift(r.lead);
+    renderTutto();
+    costruisciFormNuovo();
+    window.scrollTo(0, 0);
+    avviso("✅ Lead salvato: " + r.lead.nome);
+  } catch (e) {
+    gestisciErrore(e);
+    b.disabled = false;
+  }
+});
+
+// ---------------- Card di un lead ----------------
+function cardLeadHTML(l, conFrecce) {
+  let h = '<div class="card cliccabile" data-apri="' + esc(l.id) + '">' +
+    '<div class="titolo">' + esc(l.nome || "(senza nome)") + '</div>' +
+    '<div class="sotto">' + esc([l.comune, l.segnale].filter(Boolean).join(" · ") || "—") + '</div>' +
+    '<div class="riga-badge">' +
+      '<span class="badge fase">' + esc(l.fase) + '</span>' +
+      '<span class="badge ' + classePriorita(l.priorita) + '">' + esc(l.priorita) + '</span>' +
+      (l.contattato ? '<span class="badge ok">Contattato</span>' : "") +
+      '<span class="badge">' + esc(formattaData(l.createdAt)) + '</span>' +
+    '</div>';
+  if (conFrecce) {
+    const i = FASI.indexOf(l.fase);
+    h += '<div class="frecce">' +
+      '<button type="button" class="btn secondario piccolo" data-sposta="' + esc(l.id) + '" data-delta="-1"' + (i <= 0 ? " disabled" : "") + '>◀ Indietro</button>' +
+      '<button type="button" class="btn piccolo" data-sposta="' + esc(l.id) + '" data-delta="1"' + (i >= FASI.length - 1 ? " disabled" : "") + '>Avanti ▶</button>' +
+      '</div>';
+  }
+  return h + "</div>";
+}
+
+// Clic su card e frecce
+document.addEventListener("click", function (ev) {
+  const sposta = ev.target.closest("[data-sposta]");
+  if (sposta) {
+    ev.preventDefault();
+    spostaFase(sposta.dataset.sposta, Number(sposta.dataset.delta));
+    return;
+  }
+  const apri = ev.target.closest("[data-apri]");
+  if (apri) apriScheda(apri.dataset.apri);
+});
+
+// ---------------- Dashboard ----------------
+function barreHTML(valori, campo) {
+  const conti = valori.map(function (v) {
+    return [v, leads.filter(function (l) { return l[campo] === v; }).length];
+  });
+  const massimo = Math.max(1, ...conti.map(function (c) { return c[1]; }));
+  return conti.map(function (c) {
+    return '<div class="barra-riga"><span class="nome">' + esc(c[0]) + '</span>' +
+      '<span class="barra"><span style="width:' + Math.round(c[1] / massimo * 100) + '%"></span></span>' +
+      '<span class="cont">' + c[1] + '</span></div>';
+  }).join("");
+}
+
+function renderDashboard() {
+  const totale = leads.length;
+  const daContattare = leads.filter(function (l) { return !l.contattato; }).length;
+  const urgenti = leads.filter(function (l) { return !l.contattato && l.priorita === "Alta"; });
+  const incarichi = leads.filter(function (l) { return l.fase === "Incarico"; }).length;
+  const venduti = leads.filter(function (l) { return l.fase === "Venduto"; }).length;
+
+  $("sez-dashboard").innerHTML =
+    '<h2>Dashboard</h2>' +
+    '<div class="griglia">' +
+      '<div class="numero"><div class="val">' + totale + '</div><div class="lab">Lead totali</div></div>' +
+      '<div class="numero"><div class="val">' + daContattare + '</div><div class="lab">Da contattare</div></div>' +
+      '<div class="numero"><div class="val">' + incarichi + '</div><div class="lab">Incarichi</div></div>' +
+      '<div class="numero"><div class="val">' + venduti + '</div><div class="lab">Venduti</div></div>' +
+    '</div>' +
+    '<h3>🔥 Priorità alta da contattare (' + urgenti.length + ')</h3>' +
+    (urgenti.length ? urgenti.map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Nessuno al momento.</div>') +
+    '<h3>Lead per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
+    '<h3>Lead per segnale</h3><div class="card">' + barreHTML(SEGNALI, "segnale") + '</div>' +
+    '<h3>Ultimi inseriti</h3>' +
+    (leads.length ? leads.slice(0, 5).map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Ancora nessun lead.</div>');
+}
+
+// ---------------- Archivio ----------------
+function riempiFiltri() {
+  $("filtroFase").innerHTML = opzioni(FASI, "", "Tutte le fasi");
+  $("filtroSegnale").innerHTML = opzioni(SEGNALI, "", "Tutti i segnali");
+  $("filtroPriorita").innerHTML = opzioni(PRIORITA, "", "Tutte le priorità");
+  ["cerca", "filtroFase", "filtroSegnale", "filtroPriorita"].forEach(function (id) {
+    $(id).addEventListener("input", renderArchivio);
+    $(id).addEventListener("change", renderArchivio);
+  });
+}
+
+function leadsFiltrati() {
+  const q = $("cerca").value.trim().toLowerCase();
+  const f = $("filtroFase").value;
+  const s = $("filtroSegnale").value;
+  const p = $("filtroPriorita").value;
+  return leads.filter(function (l) {
+    if (f && l.fase !== f) return false;
+    if (s && l.segnale !== s) return false;
+    if (p && l.priorita !== p) return false;
+    if (q) {
+      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito].join(" ").toLowerCase();
+      if (testo.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function renderArchivio() {
+  const lista = leadsFiltrati();
+  $("contaArchivio").textContent = lista.length + " lead" + (lista.length !== leads.length ? " su " + leads.length : "");
+  $("listaArchivio").innerHTML = lista.length
+    ? lista.map(function (l) { return cardLeadHTML(l, false); }).join("")
+    : '<div class="vuoto">Nessun lead trovato.</div>';
+}
+
+$("btnExcel").addEventListener("click", function () {
+  const lista = leadsFiltrati();
+  if (typeof XLSX === "undefined") { avviso("Funzione Excel non disponibile: ricarica la pagina", true); return; }
+  if (!lista.length) { avviso("Nessun lead da esportare", true); return; }
+  const righe = lista.map(function (l) {
+    return {
+      "Data inserimento": formattaData(l.createdAt),
+      "Nome": l.nome || "",
+      "Comune": l.comune || "",
+      "Segnale": l.segnale || "",
+      "Priorità": l.priorita || "",
+      "Fase": l.fase || "",
+      "Contattato": l.contattato ? "Sì" : "No",
+      "Esito": l.esito || "",
+      "Gruppo / fonte": l.gruppo || "",
+      "Profilo Facebook": l.facebookUrl || "",
+      "Note": l.note || ""
+    };
+  });
+  const foglio = XLSX.utils.json_to_sheet(righe);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, foglio, "Lead");
+  XLSX.writeFile(libro, "hunter-lead-" + new Date().toISOString().slice(0, 10) + ".xlsx");
+});
+
+// ---------------- Pipeline ----------------
+function renderPipeline() {
+  $("listaPipeline").innerHTML = FASI.map(function (f) {
+    const lista = leads.filter(function (l) { return l.fase === f; });
+    const aperta = !fasiChiuse.has(f);
+    return '<details class="colonna" data-fase="' + esc(f) + '"' + (aperta ? " open" : "") + '>' +
+      '<summary><span>' + esc(f) + '</span><span class="badge">' + lista.length + '</span></summary>' +
+      '<div class="contenuto">' +
+        (lista.length ? lista.map(function (l) { return cardLeadHTML(l, true); }).join("") : '<div class="vuoto">Nessun lead in questa fase.</div>') +
+      '</div></details>';
+  }).join("");
+  $("listaPipeline").querySelectorAll("details").forEach(function (d) {
+    d.addEventListener("toggle", function () {
+      if (d.open) fasiChiuse.delete(d.dataset.fase);
+      else fasiChiuse.add(d.dataset.fase);
+    });
+  });
+}
+
+async function spostaFase(id, delta) {
+  const l = leads.find(function (x) { return x.id === id; });
+  if (!l) return;
+  const i = FASI.indexOf(l.fase);
+  const n = Math.min(FASI.length - 1, Math.max(0, i + delta));
+  if (n === i) return;
+  const vecchia = l.fase;
+  l.fase = FASI[n];
+  renderTutto();
+  try {
+    await api("PATCH", "/leads/" + encodeURIComponent(id), { fase: l.fase });
+    avviso(l.nome + " → " + l.fase);
+  } catch (e) {
+    l.fase = vecchia;
+    renderTutto();
+    gestisciErrore(e);
+  }
+}
+
+// ---------------- Scheda lead ----------------
+function apriScheda(id) {
+  const l = leads.find(function (x) { return x.id === id; });
+  if (!l) return;
+  schedaId = id;
+  $("schedaTitolo").textContent = l.nome || "Scheda lead";
+  const link = linkSicuro(l.facebookUrl);
+  $("schedaInfo").innerHTML = "Inserito il " + esc(formattaData(l.createdAt)) +
+    (link ? ' · <a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">Apri profilo Facebook ↗</a>' : "");
+  $("formScheda").innerHTML = campiLeadHTML("s", l) +
+    '<div class="azioni-scheda">' +
+      '<button type="submit" class="btn" id="btnSalvaScheda">💾 Salva</button>' +
+      '<button type="button" class="btn pericolo" id="btnEliminaScheda">🗑 Elimina</button>' +
+    '</div>';
+  $("modale").hidden = false;
+  document.body.style.overflow = "hidden";
+  document.querySelector("#modale .foglio").scrollTop = 0;
+}
+
+function chiudiScheda() {
+  $("modale").hidden = true;
+  document.body.style.overflow = "";
+  schedaId = null;
+}
+
+$("btnChiudiScheda").addEventListener("click", chiudiScheda);
+$("modale").addEventListener("click", function (ev) { if (ev.target === $("modale")) chiudiScheda(); });
+
+$("formScheda").addEventListener("submit", async function (ev) {
+  ev.preventDefault();
+  const dati = leggiCampi("s");
+  if (!dati.nome) { avviso("Il nome è obbligatorio", true); return; }
+  const b = $("btnSalvaScheda");
+  b.disabled = true;
+  try {
+    const r = await api("PATCH", "/leads/" + encodeURIComponent(schedaId), dati);
+    const i = leads.findIndex(function (x) { return x.id === schedaId; });
+    if (i >= 0) leads[i] = r.lead;
+    chiudiScheda();
+    renderTutto();
+    avviso("✅ Modifiche salvate");
+  } catch (e) {
+    gestisciErrore(e);
+    b.disabled = false;
+  }
+});
+
+$("formScheda").addEventListener("click", async function (ev) {
+  if (!ev.target.closest("#btnEliminaScheda")) return;
+  const l = leads.find(function (x) { return x.id === schedaId; });
+  if (!l) return;
+  if (!confirm('Eliminare definitivamente il lead "' + l.nome + '"?\nL\'operazione non si può annullare.')) return;
+  try {
+    await api("DELETE", "/leads/" + encodeURIComponent(l.id));
+    leads = leads.filter(function (x) { return x.id !== l.id; });
+    chiudiScheda();
+    renderTutto();
+    avviso("Lead eliminato");
+  } catch (e) {
+    gestisciErrore(e);
+  }
+});
+
+// ---------------- Avvio ----------------
+costruisciFormNuovo();
+riempiFiltri();
+renderTutto();
+(function avvio() {
+  const salvata = leggiPassword();
+  if (salvata) {
+    password = salvata;
+    entra();
+  }
+})();
+</script>
 </body>
 </html>
