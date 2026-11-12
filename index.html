@@ -17,15 +17,19 @@ html,body{margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--sfondo);color:var(--testo);font-size:16px;line-height:1.4;overflow-x:hidden;-webkit-text-size-adjust:100%;}
 [hidden]{display:none !important;}
 button{font:inherit;cursor:pointer;}
+a{color:var(--blu2);}
 input,select,textarea{font:inherit;font-size:16px;width:100%;padding:10px 12px;border:1px solid var(--bordo);border-radius:10px;background:#fff;color:var(--testo);}
 textarea{min-height:90px;resize:vertical;}
 label{display:block;font-size:14px;font-weight:600;color:#374151;margin-bottom:12px;}
 label input,label select,label textarea{margin-top:4px;font-weight:400;}
 label.check{display:flex;align-items:center;gap:10px;font-size:16px;}
 label.check input{width:22px;height:22px;margin:0;flex-shrink:0;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font-weight:600;background:var(--blu);color:#fff;}
+.riga2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;}
+.testo-aiuto{font-size:13px;color:var(--grigio);margin:-4px 0 12px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font-weight:600;background:var(--blu);color:#fff;text-decoration:none;}
 .btn.secondario{background:#e5e9f0;color:var(--blu);}
 .btn.pericolo{background:var(--rosso);color:#fff;}
+.btn.scuro{background:#7c2d12;color:#fff;}
 .btn.piccolo{padding:7px 10px;font-size:14px;border-radius:8px;}
 .btn.largo{width:100%;}
 .btn:disabled{opacity:.45;}
@@ -45,19 +49,21 @@ header h1 small{font-size:12px;font-weight:400;opacity:.7;}
 header button{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:14px;}
 main{max-width:720px;margin:0 auto;padding:16px 16px calc(90px + env(safe-area-inset-bottom));}
 h2{font-size:20px;margin:4px 0 14px;color:var(--blu);}
-h3{font-size:16px;margin:18px 0 8px;color:#374151;}
+h3{font-size:16px;margin:20px 0 8px;color:#374151;}
+p.info,.info{font-size:13px;color:var(--grigio);margin:0 0 12px;}
 
 /* ---------- Barra in basso ---------- */
 nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid var(--bordo);display:flex;padding-bottom:env(safe-area-inset-bottom);}
-nav button{flex:1;border:none;background:none;padding:8px 2px 10px;font-size:12px;color:var(--grigio);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
+nav button{flex:1;border:none;background:none;padding:8px 2px 10px;font-size:11px;color:var(--grigio);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
 nav button .ico{font-size:20px;line-height:1;}
 nav button.attivo{color:var(--blu);font-weight:700;}
 
-/* ---------- Schede notizia ---------- */
+/* ---------- Card ---------- */
 .card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-wrap:anywhere;}
 .card.cliccabile{cursor:pointer;}
 .card .titolo{font-weight:700;font-size:16px;}
 .card .sotto{color:var(--grigio);font-size:14px;margin-top:2px;}
+.card .estratto{font-size:14px;margin-top:6px;color:#374151;}
 .riga-badge{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
 .badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:#e5e9f0;color:#374151;}
 .badge.alta{background:#fed7d7;color:var(--rosso);}
@@ -65,6 +71,8 @@ nav button.attivo{color:var(--blu);font-weight:700;}
 .badge.bassa{background:#e2e8f0;color:#4a5568;}
 .badge.fase{background:#dbeafe;color:#1e40af;}
 .badge.ok{background:#c6f6d5;color:var(--verde);}
+.badge.punti{background:#ffedd5;color:#c2410c;}
+.badge.auto{background:#ede9fe;color:#5b21b6;}
 
 /* ---------- Dashboard ---------- */
 .griglia{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -72,12 +80,15 @@ nav button.attivo{color:var(--blu);font-weight:700;}
 .numero .val{font-size:28px;font-weight:800;color:var(--blu);}
 .numero .lab{font-size:13px;color:var(--grigio);}
 .barra-riga{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px;}
-.barra-riga .nome{width:118px;flex-shrink:0;}
+.barra-riga .nome{width:122px;flex-shrink:0;}
 .barra-riga .barra{flex:1;background:#e5e9f0;border-radius:6px;height:12px;overflow:hidden;}
 .barra-riga .barra span{display:block;height:100%;background:var(--blu2);}
 .barra-riga .cont{width:32px;text-align:right;font-weight:700;}
+table.tab{width:100%;border-collapse:collapse;font-size:14px;}
+table.tab th,table.tab td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--bordo);}
+table.tab .num{text-align:right;}
 
-/* ---------- Archivio ---------- */
+/* ---------- Filtri ---------- */
 .filtri{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .filtri .intero{grid-column:1 / -1;}
 .barra-azioni{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--grigio);}
@@ -92,15 +103,23 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 .frecce .btn{flex:1;}
 .vuoto{color:var(--grigio);font-size:14px;padding:8px 4px 12px;}
 
+/* ---------- Altro / Ricerca ---------- */
+.menu-altro{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.menu-altro button{background:var(--card);border:none;border-radius:12px;padding:18px 10px;font-size:15px;font-weight:700;color:var(--blu);box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;gap:6px;}
+.menu-altro .ico{font-size:28px;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.chip{display:inline-block;padding:7px 12px;border-radius:999px;background:#dbeafe;color:#1e40af;font-size:14px;font-weight:600;text-decoration:none;}
+.azioni-card{display:flex;gap:8px;margin-top:10px;}
+.azioni-card .btn{flex:1;}
+
 /* ---------- Scheda (finestra dal basso) ---------- */
 #modale{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;}
 .foglio{background:var(--sfondo);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));}
 .foglio-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
 .foglio-testa h2{margin:0;flex:1;overflow-wrap:anywhere;}
-.azioni-scheda{display:flex;gap:10px;margin-top:6px;}
-.azioni-scheda .btn{flex:1;}
-.info{font-size:13px;color:var(--grigio);margin-bottom:12px;}
-.info a{color:var(--blu2);font-weight:600;}
+.azioni-scheda{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+.azioni-scheda .btn{flex:1 1 40%;}
+.info a{font-weight:600;}
 
 /* ---------- Avvisi ---------- */
 #avviso{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:30;max-width:480px;margin:0 auto;padding:12px 16px;border-radius:10px;background:#1a202c;color:#fff;text-align:center;font-size:15px;box-shadow:0 4px 16px rgba(0,0,0,.25);}
@@ -126,7 +145,7 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v0.9</small></h1>
+    <h1>Hunter <small>v1.0</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -142,10 +161,16 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
     <section id="sez-archivio" hidden>
       <h2>Archivio Notizie</h2>
       <div class="filtri">
-        <input class="intero" type="search" id="cerca" placeholder="Cerca nome, comune, gruppo, note…">
+        <input class="intero" type="search" id="cerca" placeholder="Cerca nome, comune, note, annuncio…">
         <select id="filtroFase"></select>
         <select id="filtroSegnale"></select>
-        <select id="filtroPriorita" class="intero"></select>
+        <select id="filtroPriorita"></select>
+        <select id="filtroFonte"></select>
+        <select id="ordina" class="intero">
+          <option value="recenti">Ordina: più recenti</option>
+          <option value="punteggio">Ordina: punteggio (più calde)</option>
+          <option value="richiamo">Ordina: data di richiamo</option>
+        </select>
       </div>
       <div class="barra-azioni">
         <span id="contaArchivio"></span>
@@ -158,6 +183,78 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
       <h2>Trattative</h2>
       <div id="listaPipeline"></div>
     </section>
+
+    <section id="sez-altro" hidden>
+      <h2>Altro</h2>
+      <div class="menu-altro">
+        <button type="button" data-vai="ricerca"><span class="ico">🔎</span>Ricerca Facebook</button>
+        <button type="button" data-vai="radar"><span class="ico">📡</span>Radar di zona</button>
+        <button type="button" data-vai="amministratori"><span class="ico">🏢</span>Amministratori</button>
+        <button type="button" data-vai="impostazioni"><span class="ico">⚙️</span>Impostazioni</button>
+      </div>
+    </section>
+
+    <section id="sez-ricerca" hidden>
+      <h2>🔎 Ricerca Facebook</h2>
+      <p class="info">Hunter prepara le ricerche: un tocco apre Facebook già filtrato. Quando trovi un post interessante, copialo e incollalo qui sotto: Hunter lo analizza e prepara la notizia.</p>
+      <h3>Nei tuoi gruppi</h3>
+      <div id="ricercaGruppi"></div>
+      <h3>In tutto Facebook, per zona</h3>
+      <select id="ricercaZona"></select>
+      <div class="chips" id="ricercaChipsZona"></div>
+      <h3>🧠 Incolla un post</h3>
+      <div class="card">
+        <label>Testo del post<textarea id="testoPost" placeholder="Incolla qui il testo copiato da Facebook…"></textarea></label>
+        <label>Link al post o al profilo (facoltativo)<input id="linkPost" inputmode="url" autocapitalize="off" placeholder="https://facebook.com/..."></label>
+        <button type="button" class="btn largo" id="btnAnalizza">🧠 Analizza e prepara la notizia</button>
+      </div>
+    </section>
+
+    <section id="sez-radar" hidden>
+      <h2>📡 Radar di zona</h2>
+      <p class="info">Le notizie locali raccolte automaticamente (chiusure, trasferimenti di aziende, cantieri…) e le zone dove si concentrano le vostre notizie.</p>
+      <h3>🔥 Zone calde</h3>
+      <div id="zoneCalde"></div>
+      <h3>Notizie di zona</h3>
+      <div class="filtri">
+        <select id="radarComune"></select>
+        <select id="radarStato">
+          <option value="">Tutte</option>
+          <option value="nonlette">Solo da leggere</option>
+        </select>
+      </div>
+      <div id="listaRadar"></div>
+    </section>
+
+    <section id="sez-amministratori" hidden>
+      <h2>🏢 Amministratori di condominio</h2>
+      <button type="button" class="btn largo" id="btnNuovoAmm">➕ Nuovo amministratore</button>
+      <div class="filtri" style="margin-top:10px">
+        <input class="intero" type="search" id="cercaAmm" placeholder="Cerca nome, studio, zona, indirizzo…">
+        <select id="filtroStatoAmm" class="intero"></select>
+      </div>
+      <div id="listaAmm"></div>
+    </section>
+
+    <section id="sez-impostazioni" hidden>
+      <h2>⚙️ Impostazioni</h2>
+      <div class="card">
+        <label>Zone preferite (un comune per riga)<textarea id="impZone" placeholder="Milano&#10;Sesto San Giovanni&#10;Cinisello Balsamo"></textarea></label>
+        <div class="testo-aiuto">Le notizie in queste zone ricevono +10 punti. Servono anche al riconoscimento automatico del comune.</div>
+        <label>Parole chiave per la ricerca Facebook (una per riga)<textarea id="impParole"></textarea></label>
+        <label>Gruppi Facebook (uno per riga: Nome | link)<textarea id="impGruppi" placeholder="Sei di Sesto se... | https://www.facebook.com/groups/123456789"></textarea></label>
+        <div class="testo-aiuto">Il link si copia dalla barra degli indirizzi aprendo il gruppo su Facebook.</div>
+        <button type="button" class="btn largo" id="btnSalvaImp">💾 Salva impostazioni</button>
+      </div>
+      <h3>Come si calcola il punteggio (0–100)</h3>
+      <div class="card info">
+        <b>Base per segnale:</b> Ribasso prezzo 70 · Annuncio fermo 65 · Successione 60 · Separazione 60 · Trasferimento 55 · Trasloco 55 · Vendita Privato 50 · Sgombero 50 · Cambio casa 45 · Affitto da privato 35 · Altro 25.<br>
+        <b>Priorità:</b> Alta +15 · Media +5 · Bassa −5.<br>
+        <b>Freschezza:</b> fino a 3 giorni +15 · fino a 7 +10 · fino a 30 +5 · oltre 90 −10.<br>
+        <b>Altro:</b> ogni ribasso +8 (max 2) · annuncio online da 45+ giorni +10 · fonte Amministratore o Passaparola +10 · comune tra le zone preferite +10 · "no agenzie" −25.
+      </div>
+      <p class="info" id="infoVersioni"></p>
+    </section>
   </main>
 
   <nav>
@@ -165,14 +262,15 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
     <button type="button" data-sezione="nuovo"><span class="ico">➕</span>Nuova</button>
     <button type="button" data-sezione="archivio"><span class="ico">🗂️</span>Archivio</button>
     <button type="button" data-sezione="pipeline"><span class="ico">➡️</span>Trattative</button>
+    <button type="button" data-sezione="altro"><span class="ico">☰</span>Altro</button>
   </nav>
 </div>
 
-<!-- ================= SCHEDA NOTIZIA ================= -->
+<!-- ================= SCHEDA (notizia o amministratore) ================= -->
 <div id="modale" hidden>
   <div class="foglio">
     <div class="foglio-testa">
-      <h2 id="schedaTitolo">Scheda notizia</h2>
+      <h2 id="schedaTitolo">Scheda</h2>
       <button type="button" class="btn secondario piccolo" id="btnChiudiScheda">✕ Chiudi</button>
     </div>
     <div class="info" id="schedaInfo"></div>
@@ -180,21 +278,45 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
   </div>
 </div>
 
+<datalist id="listaComuni"></datalist>
 <div id="avviso" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 0.9 (terminologia: Notizie, Trattative)
+// HUNTER - app web - versione 1.0 (radar)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Altro"];
+const VERSIONE_APP = "1.0";
+const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
+const FONTI = ["Facebook", "Portale", "Amministratore", "Passaparola", "Radar di zona", "Altro"];
+const STATI_AMM = ["Da contattare", "Conosciuto", "Collaboratore"];
+const FASI_CHIUSE = ["Incarico", "Venduto"];
 const CHIAVE_MEMORIA = "hunterKey";
+const SEZIONI = ["dashboard", "nuovo", "archivio", "pipeline", "altro", "ricerca", "radar", "amministratori", "impostazioni"];
+const SOTTO_ALTRO = ["altro", "ricerca", "radar", "amministratori", "impostazioni"];
+
+const COMUNI_BASE = ["Milano", "Sesto San Giovanni", "Cinisello Balsamo", "Monza", "Cologno Monzese", "Rho", "Legnano", "Paderno Dugnano", "Bollate", "San Donato Milanese", "San Giuliano Milanese", "Segrate", "Pioltello", "Corsico", "Buccinasco", "Rozzano", "Opera", "Assago", "Cesano Boscone", "Settimo Milanese", "Pero", "Bresso", "Cusano Milanino", "Cormano", "Novate Milanese", "Arese", "Garbagnate Milanese", "Senago", "Limbiate", "Peschiera Borromeo", "Melzo", "Gorgonzola", "Cernusco sul Naviglio", "Vimodrone", "Abbiategrasso", "Magenta", "Parabiago", "Nerviano", "Lainate", "Trezzano sul Naviglio", "Cesate", "Brugherio", "Carugate", "Bussero", "Cassina de' Pecchi", "Cornaredo", "Baranzate"];
+
+const REGOLE_SEGNALI = [
+  ["Successione", /eredit|successione|defunt|scompars[ao]|venut[oa] a mancare/i],
+  ["Separazione", /separazion|divorzi/i],
+  ["Sgombero", /sgombero|svuot\w*\s+(la\s+)?casa|svuoto|vendo tutto|liberare\s+(l')?appartamento/i],
+  ["Trasferimento", /trasferiment|mi trasferisco|ci trasferiamo|trasferit[oa] per lavoro/i],
+  ["Trasloco", /trasloc/i],
+  ["Cambio casa", /casa pi[uù] grande|casa pi[uù] piccola|pi[uù] spazio|arriva un bimb|aspettiamo un/i]
+];
+const REGEX_NO_AGENZIE = /(no|niente|astenersi|esclus[ei])\s+(perditempo\s+(e|o|ed)\s+)?agenzi|no\s+intermediari|non\s+agenzie|solo\s+privati/i;
 
 let password = "";
 let leads = [];
+let amministratori = [];
+let radar = [];
+let impostazioni = { zonePreferite: [], paroleChiave: [], gruppiFacebook: [] };
+let versioneWorker = "";
+let schedaTipo = null;
 let schedaId = null;
 const fasiChiuse = new Set();
 
@@ -216,7 +338,28 @@ function formattaData(iso) {
   return d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
+function formattaGiorno(g) {
+  if (!g || !/^\d{4}-\d{2}-\d{2}$/.test(g)) return "";
+  const p = g.split("-");
+  return p[2] + "/" + p[1] + "/" + p[0];
+}
+
+function oggiISO() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function euro(n) { return Number(n).toLocaleString("it-IT") + " €"; }
 function contaNotizie(n) { return n === 1 ? "1 notizia" : n + " notizie"; }
+function nomeAmministratore(id) {
+  const a = amministratori.find(function (x) { return x.id === id; });
+  return a ? a.nome : "";
+}
+function conLinkCompleto(u) {
+  u = String(u || "").trim();
+  if (u && !/^https?:\/\//i.test(u)) u = "https://" + u;
+  return u;
+}
 
 function avviso(msg, errore) {
   const a = $("avviso");
@@ -224,7 +367,7 @@ function avviso(msg, errore) {
   a.className = errore ? "errore-avviso" : "";
   a.hidden = false;
   clearTimeout(avviso.timer);
-  avviso.timer = setTimeout(function () { a.hidden = true; }, errore ? 4500 : 2500);
+  avviso.timer = setTimeout(function () { a.hidden = true; }, errore ? 4500 : 2800);
 }
 
 function opzioni(lista, selezionato, vuota) {
@@ -235,6 +378,16 @@ function opzioni(lista, selezionato, vuota) {
 }
 
 function classePriorita(p) { return p === "Alta" ? "alta" : p === "Bassa" ? "bassa" : "media"; }
+
+function trovaComune(testo) {
+  const t = " " + String(testo || "").toLowerCase() + " ";
+  const candidati = impostazioni.zonePreferite.concat(COMUNI_BASE).slice().sort(function (a, b) { return b.length - a.length; });
+  for (const c of candidati) {
+    const cc = String(c).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp("[^a-zàèéìòù]" + cc + "[^a-zàèéìòù]").test(t)) return c;
+  }
+  return "";
+}
 
 // ---------------- Memoria del dispositivo ----------------
 function leggiPassword() { try { return localStorage.getItem(CHIAVE_MEMORIA) || ""; } catch (e) { return ""; } }
@@ -282,7 +435,8 @@ $("formLogin").addEventListener("submit", async function (ev) {
   $("loginErrore").textContent = "";
   password = p;
   try {
-    await api("GET", "/verifica");
+    const r = await api("GET", "/verifica");
+    versioneWorker = r.versione || "";
     salvaPassword(p);
     $("loginPassword").value = "";
     await entra();
@@ -298,13 +452,13 @@ async function entra() {
   $("login").hidden = true;
   $("app").hidden = false;
   mostraSezione("dashboard");
-  await caricaLeads();
+  await caricaTutto();
 }
 
 function esci() {
   cancellaPassword();
   password = "";
-  leads = [];
+  leads = []; amministratori = []; radar = [];
   chiudiScheda();
   $("app").hidden = true;
   $("login").hidden = false;
@@ -315,16 +469,34 @@ $("btnEsci").addEventListener("click", function () {
 });
 
 $("btnAggiorna").addEventListener("click", async function () {
-  const ok = await caricaLeads();
+  const ok = await caricaTutto();
   if (ok) avviso("Dati aggiornati");
 });
 
 // ---------------- Caricamento dati ----------------
-async function caricaLeads() {
+async function caricaTutto() {
   $("sez-dashboard").innerHTML = '<div class="caricamento">Caricamento…</div>';
   try {
-    const r = await api("GET", "/leads");
-    leads = r.leads || [];
+    const r = await Promise.all([
+      api("GET", "/leads"),
+      api("GET", "/amministratori"),
+      api("GET", "/radar"),
+      api("GET", "/impostazioni")
+    ]);
+    leads = r[0].leads || [];
+    amministratori = r[1].amministratori || [];
+    radar = r[2].radar || [];
+    impostazioni = {
+      zonePreferite: r[3].zonePreferite || [],
+      paroleChiave: r[3].paroleChiave || [],
+      gruppiFacebook: r[3].gruppiFacebook || []
+    };
+    if (!versioneWorker) {
+      try { versioneWorker = (await api("GET", "/verifica")).versione || ""; } catch (e) {}
+    }
+    aggiornaSelectAmministratori();
+    aggiornaDatalistComuni();
+    riempiImpostazioni();
     renderTutto();
     return true;
   } catch (e) {
@@ -338,6 +510,10 @@ function renderTutto() {
   renderDashboard();
   renderArchivio();
   renderPipeline();
+  renderRicerca();
+  renderRadar();
+  renderAmministratori();
+  $("infoVersioni").textContent = "App v" + VERSIONE_APP + (versioneWorker ? " · Worker v" + versioneWorker : "");
 }
 
 // ---------------- Navigazione ----------------
@@ -346,57 +522,102 @@ document.querySelectorAll("nav button").forEach(function (b) {
 });
 
 function mostraSezione(nome) {
-  ["dashboard", "nuovo", "archivio", "pipeline"].forEach(function (s) {
-    $("sez-" + s).hidden = s !== nome;
-  });
+  SEZIONI.forEach(function (s) { $("sez-" + s).hidden = s !== nome; });
+  const voceNav = SOTTO_ALTRO.indexOf(nome) !== -1 ? "altro" : nome;
   document.querySelectorAll("nav button").forEach(function (b) {
-    b.classList.toggle("attivo", b.dataset.sezione === nome);
+    b.classList.toggle("attivo", b.dataset.sezione === voceNav);
   });
   window.scrollTo(0, 0);
 }
 
-// ---------------- Modulo notizia (nuova e scheda) ----------------
-function campiLeadHTML(p, l) {
+// ---------------- Elenchi di supporto ----------------
+function aggiornaDatalistComuni() {
+  const tutti = [];
+  impostazioni.zonePreferite.concat(COMUNI_BASE).forEach(function (c) { if (tutti.indexOf(c) === -1) tutti.push(c); });
+  $("listaComuni").innerHTML = tutti.map(function (c) { return '<option value="' + esc(c) + '">'; }).join("");
+}
+
+function opzioniAmministratori(selezionato) {
+  return '<option value="">— nessuno —</option>' + amministratori.map(function (a) {
+    return '<option value="' + esc(a.id) + '"' + (a.id === selezionato ? " selected" : "") + ">" + esc(a.nome + (a.studio ? " (" + a.studio + ")" : "")) + "</option>";
+  }).join("");
+}
+
+function aggiornaSelectAmministratori() {
+  const s = $("n-amministratoreId");
+  if (s) { const v = s.value; s.innerHTML = opzioniAmministratori(v); }
+}
+
+// ---------------- Modulo notizia ----------------
+function campiNotiziaHTML(p, l) {
   l = l || {};
   return '' +
-    '<label>Nome e cognome *<input id="' + p + '-nome" maxlength="200" required value="' + esc(l.nome) + '"></label>' +
-    '<label>Comune<input id="' + p + '-comune" maxlength="100" value="' + esc(l.comune) + '" placeholder="es. Sesto San Giovanni"></label>' +
+    '<label>Nome e cognome (o titolo) *<input id="' + p + '-nome" maxlength="200" required value="' + esc(l.nome) + '"></label>' +
+    '<label>Comune<input id="' + p + '-comune" list="listaComuni" maxlength="100" value="' + esc(l.comune) + '"></label>' +
     '<label>Segnale<select id="' + p + '-segnale">' + opzioni(SEGNALI, l.segnale || "", "— scegli —") + '</select></label>' +
-    '<label>Priorità<select id="' + p + '-priorita">' + opzioni(PRIORITA, l.priorita || "Media") + '</select></label>' +
-    '<label>Fase<select id="' + p + '-fase">' + opzioni(FASI, l.fase || "Nuova Notizia") + '</select></label>' +
-    '<label>Gruppo Facebook / fonte<input id="' + p + '-gruppo" maxlength="200" value="' + esc(l.gruppo) + '"></label>' +
-    '<label>Link profilo Facebook<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://facebook.com/..."></label>' +
+    '<div class="riga2">' +
+      '<label>Priorità<select id="' + p + '-priorita">' + opzioni(PRIORITA, l.priorita || "Media") + '</select></label>' +
+      '<label>Fase<select id="' + p + '-fase">' + opzioni(FASI, l.fase || "Nuova Notizia") + '</select></label>' +
+    '</div>' +
+    '<div class="riga2">' +
+      '<label>Fonte<select id="' + p + '-fonte">' + opzioni(FONTI, l.fonte || "Facebook") + '</select></label>' +
+      '<label>Amministratore<select id="' + p + '-amministratoreId">' + opzioniAmministratori(l.amministratoreId || "") + '</select></label>' +
+    '</div>' +
+    '<label>Gruppo / ricerca / dettaglio fonte<input id="' + p + '-gruppo" maxlength="200" value="' + esc(l.gruppo) + '"></label>' +
+    '<label>Link profilo o post Facebook<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://facebook.com/..."></label>' +
+    '<label>Link annuncio (portali)<input id="' + p + '-linkAnnuncio" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.linkAnnuncio) + '" placeholder="https://..."></label>' +
+    '<div class="riga2">' +
+      '<label>Prezzo (€)<input id="' + p + '-prezzo" type="number" inputmode="numeric" min="0" step="1000" value="' + esc(l.prezzo === null || l.prezzo === undefined ? "" : l.prezzo) + '"></label>' +
+      '<label>Prossimo contatto<input id="' + p + '-dataProssimoContatto" type="date" value="' + esc(l.dataProssimoContatto) + '"></label>' +
+    '</div>' +
     '<label class="check"><input type="checkbox" id="' + p + '-contattato"' + (l.contattato ? " checked" : "") + '> Già contattato</label>' +
+    '<label class="check"><input type="checkbox" id="' + p + '-noAgenzie"' + (l.noAgenzie ? " checked" : "") + '> Annuncio con «no agenzie»</label>' +
     '<label>Esito ultimo contatto<input id="' + p + '-esito" maxlength="1000" value="' + esc(l.esito) + '"></label>' +
     '<label>Note<textarea id="' + p + '-note" maxlength="5000">' + esc(l.note) + '</textarea></label>';
 }
 
-function leggiCampi(p) {
-  let fb = $(p + "-facebookUrl").value.trim();
-  if (fb && !/^https?:\/\//i.test(fb)) fb = "https://" + fb;
+function leggiCampiNotizia(p) {
+  const prezzo = $(p + "-prezzo").value.trim();
   return {
     nome: $(p + "-nome").value.trim(),
     comune: $(p + "-comune").value.trim(),
     segnale: $(p + "-segnale").value,
     priorita: $(p + "-priorita").value,
     fase: $(p + "-fase").value,
+    fonte: $(p + "-fonte").value,
+    amministratoreId: $(p + "-amministratoreId").value,
     gruppo: $(p + "-gruppo").value.trim(),
-    facebookUrl: fb,
+    facebookUrl: conLinkCompleto($(p + "-facebookUrl").value),
+    linkAnnuncio: conLinkCompleto($(p + "-linkAnnuncio").value),
+    prezzo: prezzo === "" ? null : Number(prezzo),
+    dataProssimoContatto: $(p + "-dataProssimoContatto").value,
     contattato: $(p + "-contattato").checked,
+    noAgenzie: $(p + "-noAgenzie").checked,
     esito: $(p + "-esito").value.trim(),
     note: $(p + "-note").value.trim()
   };
 }
 
+// Proposta 3: dalla fase "Contattato" in poi si spunta "Già contattato"
+document.addEventListener("change", function (ev) {
+  const t = ev.target;
+  if (t && t.id && /-fase$/.test(t.id)) {
+    const p = t.id.split("-")[0];
+    if (FASI.indexOf(t.value) >= FASI.indexOf("Contattato") && $(p + "-contattato")) {
+      $(p + "-contattato").checked = true;
+    }
+  }
+});
+
 // ---------------- Nuova notizia ----------------
 function costruisciFormNuovo() {
-  $("formNuovo").innerHTML = campiLeadHTML("n", {}) +
+  $("formNuovo").innerHTML = campiNotiziaHTML("n", {}) +
     '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva notizia</button>';
 }
 
 $("formNuovo").addEventListener("submit", async function (ev) {
   ev.preventDefault();
-  const dati = leggiCampi("n");
+  const dati = leggiCampiNotizia("n");
   if (!dati.nome) { avviso("Il nome è obbligatorio", true); return; }
   const b = $("btnSalvaNuovo");
   b.disabled = true;
@@ -414,16 +635,29 @@ $("formNuovo").addEventListener("submit", async function (ev) {
 });
 
 // ---------------- Card di una notizia ----------------
-function cardLeadHTML(l, conFrecce) {
+function cardNotiziaHTML(l, conFrecce) {
+  const oggi = oggiISO();
+  const b = [];
+  if (typeof l.punteggio === "number" && FASI.indexOf(l.fase) <= 1) b.push('<span class="badge punti">🔥 ' + l.punteggio + '</span>');
+  b.push('<span class="badge fase">' + esc(l.fase) + '</span>');
+  b.push('<span class="badge ' + classePriorita(l.priorita) + '">' + esc(l.priorita) + '</span>');
+  if (l.automatica) b.push('<span class="badge auto">🤖 ' + esc(l.portale || "Automatica") + '</span>');
+  else if (l.fonte) b.push('<span class="badge">' + esc(l.fonte) + '</span>');
+  if (l.contattato) b.push('<span class="badge ok">Contattato</span>');
+  if (l.prezzo) b.push('<span class="badge">' + esc(euro(l.prezzo)) + '</span>');
+  if (l.ribassi) b.push('<span class="badge alta">📉 ribasso ×' + esc(l.ribassi) + '</span>');
+  if (l.annuncioFermo) b.push('<span class="badge media">⏳ online da ' + esc(l.giorniOnline) + ' gg</span>');
+  if (l.noAgenzie) b.push('<span class="badge bassa">🚫 no agenzie</span>');
+  if (l.dataProssimoContatto) {
+    const scaduto = l.dataProssimoContatto <= oggi;
+    b.push('<span class="badge ' + (scaduto ? "alta" : "") + '">📅 ' + esc(formattaGiorno(l.dataProssimoContatto)) + '</span>');
+  }
+  b.push('<span class="badge">' + esc(formattaData(l.createdAt)) + '</span>');
+
   let h = '<div class="card cliccabile" data-apri="' + esc(l.id) + '">' +
     '<div class="titolo">' + esc(l.nome || "(senza nome)") + '</div>' +
     '<div class="sotto">' + esc([l.comune, l.segnale].filter(Boolean).join(" · ") || "—") + '</div>' +
-    '<div class="riga-badge">' +
-      '<span class="badge fase">' + esc(l.fase) + '</span>' +
-      '<span class="badge ' + classePriorita(l.priorita) + '">' + esc(l.priorita) + '</span>' +
-      (l.contattato ? '<span class="badge ok">Contattato</span>' : "") +
-      '<span class="badge">' + esc(formattaData(l.createdAt)) + '</span>' +
-    '</div>';
+    '<div class="riga-badge">' + b.join("") + '</div>';
   if (conFrecce) {
     const i = FASI.indexOf(l.fase);
     h += '<div class="frecce">' +
@@ -434,16 +668,37 @@ function cardLeadHTML(l, conFrecce) {
   return h + "</div>";
 }
 
-// Clic su card e frecce
-document.addEventListener("click", function (ev) {
-  const sposta = ev.target.closest("[data-sposta]");
-  if (sposta) {
-    ev.preventDefault();
-    spostaFase(sposta.dataset.sposta, Number(sposta.dataset.delta));
-    return;
+function cardAmmHTML(a) {
+  const oggi = oggiISO();
+  const collegate = leads.filter(function (l) { return l.amministratoreId === a.id; });
+  const incarichi = collegate.filter(function (l) { return FASI_CHIUSE.indexOf(l.fase) !== -1; }).length;
+  const b = ['<span class="badge ' + (a.stato === "Collaboratore" ? "ok" : a.stato === "Conosciuto" ? "fase" : "") + '">' + esc(a.stato) + '</span>'];
+  if (a.dataProssimoContatto) {
+    b.push('<span class="badge ' + (a.dataProssimoContatto <= oggi ? "alta" : "") + '">📅 ' + esc(formattaGiorno(a.dataProssimoContatto)) + '</span>');
   }
-  const apri = ev.target.closest("[data-apri]");
-  if (apri) apriScheda(apri.dataset.apri);
+  b.push('<span class="badge">' + contaNotizie(collegate.length) + '</span>');
+  if (incarichi) b.push('<span class="badge ok">' + incarichi + ' incarichi</span>');
+  return '<div class="card cliccabile" data-amm="' + esc(a.id) + '">' +
+    '<div class="titolo">🏢 ' + esc(a.nome) + '</div>' +
+    '<div class="sotto">' + esc([a.studio, a.zone].filter(Boolean).join(" · ") || "—") + '</div>' +
+    '<div class="riga-badge">' + b.join("") + '</div></div>';
+}
+
+// ---------------- Clic globali ----------------
+document.addEventListener("click", function (ev) {
+  const t = ev.target;
+  const sposta = t.closest("[data-sposta]");
+  if (sposta) { ev.preventDefault(); spostaFase(sposta.dataset.sposta, Number(sposta.dataset.delta)); return; }
+  const letto = t.closest("[data-radar-letto]");
+  if (letto) { ev.preventDefault(); segnaRadar(letto.dataset.radarLetto); return; }
+  const elimRadar = t.closest("[data-radar-elimina]");
+  if (elimRadar) { ev.preventDefault(); eliminaRadar(elimRadar.dataset.radarElimina); return; }
+  const vai = t.closest("[data-vai]");
+  if (vai) { mostraSezione(vai.dataset.vai); return; }
+  const amm = t.closest("[data-amm]");
+  if (amm) { apriSchedaAmm(amm.dataset.amm); return; }
+  const apri = t.closest("[data-apri]");
+  if (apri) { apriScheda(apri.dataset.apri); }
 });
 
 // ---------------- Dashboard ----------------
@@ -460,26 +715,51 @@ function barreHTML(valori, campo) {
 }
 
 function renderDashboard() {
-  const totale = leads.length;
-  const daContattare = leads.filter(function (l) { return !l.contattato; }).length;
-  const urgenti = leads.filter(function (l) { return !l.contattato && l.priorita === "Alta"; });
+  const oggi = oggiISO();
+  const aperte = leads.filter(function (l) { return FASI_CHIUSE.indexOf(l.fase) === -1; });
+  const daContattare = aperte.filter(function (l) { return !l.contattato; }).length;
   const incarichi = leads.filter(function (l) { return l.fase === "Incarico"; }).length;
   const venduti = leads.filter(function (l) { return l.fase === "Venduto"; }).length;
+  const richiami = aperte
+    .filter(function (l) { return l.dataProssimoContatto && l.dataProssimoContatto <= oggi; })
+    .sort(function (a, b) { return a.dataProssimoContatto.localeCompare(b.dataProssimoContatto); });
+  const richiamiAmm = amministratori.filter(function (a) { return a.dataProssimoContatto && a.dataProssimoContatto <= oggi; });
+  const calde = leads
+    .filter(function (l) { return FASI.indexOf(l.fase) <= 1; })
+    .sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); })
+    .slice(0, 10);
+  const settimana = Date.now() - 7 * 86400000;
+  const auto7 = leads.filter(function (l) { return l.automatica && (Date.parse(l.createdAt || "") || 0) >= settimana; }).length;
+  const radarDaLeggere = radar.filter(function (r) { return !r.letto; }).length;
+
+  const righeFonti = FONTI.map(function (f) {
+    const tot = leads.filter(function (l) { return (l.fonte || "Altro") === f; });
+    const inc = tot.filter(function (l) { return FASI_CHIUSE.indexOf(l.fase) !== -1; }).length;
+    const perc = tot.length ? Math.round(inc / tot.length * 100) : 0;
+    return '<tr><td>' + esc(f) + '</td><td class="num">' + tot.length + '</td><td class="num">' + inc + '</td><td class="num">' + perc + '%</td></tr>';
+  }).join("");
 
   $("sez-dashboard").innerHTML =
     '<h2>Dashboard</h2>' +
     '<div class="griglia">' +
-      '<div class="numero"><div class="val">' + totale + '</div><div class="lab">Notizie totali</div></div>' +
+      '<div class="numero"><div class="val">' + aperte.length + '</div><div class="lab">Notizie aperte</div></div>' +
       '<div class="numero"><div class="val">' + daContattare + '</div><div class="lab">Da contattare</div></div>' +
       '<div class="numero"><div class="val">' + incarichi + '</div><div class="lab">Incarichi</div></div>' +
       '<div class="numero"><div class="val">' + venduti + '</div><div class="lab">Venduti</div></div>' +
     '</div>' +
-    '<h3>🔥 Priorità alta da contattare (' + urgenti.length + ')</h3>' +
-    (urgenti.length ? urgenti.map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Nessuna al momento.</div>') +
+    '<div class="riga-badge" style="margin-top:12px">' +
+      '<span class="badge auto">🤖 ' + auto7 + ' trovate in automatico negli ultimi 7 giorni</span>' +
+      (radarDaLeggere ? '<span class="badge fase" data-vai="radar" style="cursor:pointer">📡 ' + radarDaLeggere + ' notizie di zona da leggere</span>' : "") +
+    '</div>' +
+    '<h3>📅 Da richiamare oggi (' + (richiami.length + richiamiAmm.length) + ')</h3>' +
+    (richiami.length || richiamiAmm.length
+      ? richiami.map(function (l) { return cardNotiziaHTML(l, false); }).join("") + richiamiAmm.map(cardAmmHTML).join("")
+      : '<div class="vuoto">Nessun richiamo in scadenza.</div>') +
+    '<h3>🔥 Le 10 notizie più calde</h3>' +
+    (calde.length ? calde.map(function (l) { return cardNotiziaHTML(l, false); }).join("") : '<div class="vuoto">Nessuna notizia da contattare.</div>') +
     '<h3>Notizie per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
     '<h3>Notizie per segnale</h3><div class="card">' + barreHTML(SEGNALI, "segnale") + '</div>' +
-    '<h3>Ultime inserite</h3>' +
-    (leads.length ? leads.slice(0, 5).map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Ancora nessuna notizia.</div>');
+    '<h3>Resa per fonte</h3><div class="card"><table class="tab"><tr><th>Fonte</th><th class="num">Notizie</th><th class="num">Incarichi</th><th class="num">Resa</th></tr>' + righeFonti + '</table></div>';
 }
 
 // ---------------- Archivio ----------------
@@ -487,10 +767,20 @@ function riempiFiltri() {
   $("filtroFase").innerHTML = opzioni(FASI, "", "Tutte le fasi");
   $("filtroSegnale").innerHTML = opzioni(SEGNALI, "", "Tutti i segnali");
   $("filtroPriorita").innerHTML = opzioni(PRIORITA, "", "Tutte le priorità");
-  ["cerca", "filtroFase", "filtroSegnale", "filtroPriorita"].forEach(function (id) {
+  $("filtroFonte").innerHTML = opzioni(FONTI, "", "Tutte le fonti");
+  $("filtroStatoAmm").innerHTML = opzioni(STATI_AMM, "", "Tutti gli stati");
+  ["cerca", "filtroFase", "filtroSegnale", "filtroPriorita", "filtroFonte", "ordina"].forEach(function (id) {
     $(id).addEventListener("input", renderArchivio);
     $(id).addEventListener("change", renderArchivio);
   });
+  ["cercaAmm", "filtroStatoAmm"].forEach(function (id) {
+    $(id).addEventListener("input", renderAmministratori);
+    $(id).addEventListener("change", renderAmministratori);
+  });
+  ["radarComune", "radarStato"].forEach(function (id) {
+    $(id).addEventListener("change", renderRadar);
+  });
+  $("ricercaZona").addEventListener("change", renderChipsZona);
 }
 
 function leadsFiltrati() {
@@ -498,23 +788,36 @@ function leadsFiltrati() {
   const f = $("filtroFase").value;
   const s = $("filtroSegnale").value;
   const p = $("filtroPriorita").value;
-  return leads.filter(function (l) {
+  const fo = $("filtroFonte").value;
+  const ord = $("ordina").value;
+  const lista = leads.filter(function (l) {
     if (f && l.fase !== f) return false;
     if (s && l.segnale !== s) return false;
     if (p && l.priorita !== p) return false;
+    if (fo && (l.fonte || "Altro") !== fo) return false;
     if (q) {
-      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito].join(" ").toLowerCase();
+      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito, l.titoloAnnuncio, l.portale].join(" ").toLowerCase();
       if (testo.indexOf(q) === -1) return false;
     }
     return true;
   });
+  if (ord === "punteggio") {
+    lista.sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); });
+  } else if (ord === "richiamo") {
+    lista.sort(function (a, b) {
+      const da = a.dataProssimoContatto || "9999-99-99";
+      const db = b.dataProssimoContatto || "9999-99-99";
+      return da.localeCompare(db);
+    });
+  }
+  return lista;
 }
 
 function renderArchivio() {
   const lista = leadsFiltrati();
   $("contaArchivio").textContent = contaNotizie(lista.length) + (lista.length !== leads.length ? " su " + leads.length : "");
   $("listaArchivio").innerHTML = lista.length
-    ? lista.map(function (l) { return cardLeadHTML(l, false); }).join("")
+    ? lista.map(function (l) { return cardNotiziaHTML(l, false); }).join("")
     : '<div class="vuoto">Nessuna notizia trovata.</div>';
 }
 
@@ -525,33 +828,44 @@ $("btnExcel").addEventListener("click", function () {
   const righe = lista.map(function (l) {
     return {
       "Data inserimento": formattaData(l.createdAt),
-      "Nome": l.nome || "",
+      "Nome / titolo": l.nome || "",
       "Comune": l.comune || "",
       "Segnale": l.segnale || "",
       "Priorità": l.priorita || "",
       "Fase": l.fase || "",
+      "Punteggio": l.punteggio === undefined ? "" : l.punteggio,
+      "Fonte": l.fonte || "",
+      "Trovata in automatico": l.automatica ? "Sì" : "No",
+      "Amministratore": nomeAmministratore(l.amministratoreId),
       "Contattato": l.contattato ? "Sì" : "No",
+      "Prossimo contatto": formattaGiorno(l.dataProssimoContatto),
+      "Prezzo": l.prezzo || "",
+      "Ribassi": l.ribassi || 0,
+      "No agenzie": l.noAgenzie ? "Sì" : "No",
       "Esito": l.esito || "",
-      "Gruppo / fonte": l.gruppo || "",
-      "Profilo Facebook": l.facebookUrl || "",
+      "Gruppo / ricerca": l.gruppo || "",
+      "Link Facebook": l.facebookUrl || "",
+      "Link annuncio": l.linkAnnuncio || "",
       "Note": l.note || ""
     };
   });
   const foglio = XLSX.utils.json_to_sheet(righe);
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, foglio, "Notizie");
-  XLSX.writeFile(libro, "hunter-notizie-" + new Date().toISOString().slice(0, 10) + ".xlsx");
+  XLSX.writeFile(libro, "hunter-notizie-" + oggiISO() + ".xlsx");
 });
 
 // ---------------- Trattative ----------------
 function renderPipeline() {
   $("listaPipeline").innerHTML = FASI.map(function (f) {
-    const lista = leads.filter(function (l) { return l.fase === f; });
+    const lista = leads
+      .filter(function (l) { return l.fase === f; })
+      .sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); });
     const aperta = !fasiChiuse.has(f);
     return '<details class="colonna" data-fase="' + esc(f) + '"' + (aperta ? " open" : "") + '>' +
       '<summary><span>' + esc(f) + '</span><span class="badge">' + lista.length + '</span></summary>' +
       '<div class="contenuto">' +
-        (lista.length ? lista.map(function (l) { return cardLeadHTML(l, true); }).join("") : '<div class="vuoto">Nessuna notizia in questa fase.</div>') +
+        (lista.length ? lista.map(function (l) { return cardNotiziaHTML(l, true); }).join("") : '<div class="vuoto">Nessuna notizia in questa fase.</div>') +
       '</div></details>';
   }).join("");
   $("listaPipeline").querySelectorAll("details").forEach(function (d) {
@@ -563,17 +877,20 @@ function renderPipeline() {
 }
 
 async function spostaFase(id, delta) {
-  const l = leads.find(function (x) { return x.id === id; });
-  if (!l) return;
-  const i = FASI.indexOf(l.fase);
-  const n = Math.min(FASI.length - 1, Math.max(0, i + delta));
-  if (n === i) return;
+  const i = leads.findIndex(function (x) { return x.id === id; });
+  if (i < 0) return;
+  const l = leads[i];
+  const pos = FASI.indexOf(l.fase);
+  const n = Math.min(FASI.length - 1, Math.max(0, pos + delta));
+  if (n === pos) return;
   const vecchia = l.fase;
   l.fase = FASI[n];
   renderTutto();
   try {
-    await api("PATCH", "/leads/" + encodeURIComponent(id), { fase: l.fase });
-    avviso(l.nome + " → " + l.fase);
+    const r = await api("PATCH", "/leads/" + encodeURIComponent(id), { fase: FASI[n] });
+    leads[i] = r.lead;
+    renderTutto();
+    avviso(r.lead.nome + " → " + r.lead.fase);
   } catch (e) {
     l.fase = vecchia;
     renderTutto();
@@ -581,20 +898,229 @@ async function spostaFase(id, delta) {
   }
 }
 
+// ---------------- Ricerca Facebook ----------------
+function urlGruppo(u) { return String(u || "").split("?")[0].split("#")[0].replace(/\/+$/, ""); }
+
+function renderRicerca() {
+  const parole = impostazioni.paroleChiave;
+  const gruppi = impostazioni.gruppiFacebook;
+  if (!parole.length) {
+    $("ricercaGruppi").innerHTML = '<div class="vuoto">Aggiungi le parole chiave in ⚙️ Impostazioni.</div>';
+  } else if (!gruppi.length) {
+    $("ricercaGruppi").innerHTML = '<div class="vuoto">Aggiungi i tuoi gruppi Facebook in ⚙️ Impostazioni.</div>';
+  } else {
+    $("ricercaGruppi").innerHTML = gruppi.map(function (g) {
+      const base = urlGruppo(g.url);
+      return '<div class="card"><div class="titolo">' + esc(g.nome) + '</div><div class="chips">' +
+        parole.map(function (k) {
+          return '<a class="chip" target="_blank" rel="noopener noreferrer" href="' + esc(base + "/search/?q=" + encodeURIComponent(k)) + '">' + esc(k) + '</a>';
+        }).join("") + '</div></div>';
+    }).join("");
+  }
+  const zone = impostazioni.zonePreferite.length ? impostazioni.zonePreferite : ["Milano"];
+  const attuale = $("ricercaZona").value;
+  $("ricercaZona").innerHTML = opzioni(zone, zone.indexOf(attuale) !== -1 ? attuale : zone[0]);
+  renderChipsZona();
+}
+
+function renderChipsZona() {
+  const zona = $("ricercaZona").value || "";
+  const parole = impostazioni.paroleChiave;
+  $("ricercaChipsZona").innerHTML = parole.length ? parole.map(function (k) {
+    const q = k + " " + zona;
+    return '<a class="chip" target="_blank" rel="noopener noreferrer" href="' + esc("https://www.facebook.com/search/posts/?q=" + encodeURIComponent(q)) + '">' + esc(k) + '</a>';
+  }).join("") : '<div class="vuoto">Aggiungi le parole chiave in ⚙️ Impostazioni.</div>';
+}
+
+$("btnAnalizza").addEventListener("click", function () {
+  const testo = $("testoPost").value.trim();
+  if (!testo) { avviso("Incolla prima il testo del post", true); return; }
+  let segnale = "Altro";
+  for (const r of REGOLE_SEGNALI) { if (r[1].test(testo)) { segnale = r[0]; break; } }
+  if (segnale === "Altro" && /vendo\s+(casa|appartamento|monolocale|bilocale|trilocale|quadrilocale|villa|attico)|vendesi/i.test(testo)) segnale = "Vendita Privato";
+  if (segnale === "Altro" && /affittasi|affitto\s+(il\s+)?mio|locasi/i.test(testo)) segnale = "Affitto da privato";
+  const noAg = REGEX_NO_AGENZIE.test(testo);
+  const comune = trovaComune(testo);
+  const priorita = noAg ? "Bassa" : (["Successione", "Separazione", "Trasferimento"].indexOf(segnale) !== -1 ? "Alta" : "Media");
+  const link = conLinkCompleto($("linkPost").value);
+
+  costruisciFormNuovo();
+  $("n-segnale").value = segnale;
+  $("n-comune").value = comune;
+  $("n-priorita").value = priorita;
+  $("n-fonte").value = "Facebook";
+  $("n-noAgenzie").checked = noAg;
+  $("n-note").value = testo.slice(0, 1000);
+  if (link) $("n-facebookUrl").value = link;
+  $("testoPost").value = "";
+  $("linkPost").value = "";
+  mostraSezione("nuovo");
+  avviso("Analisi fatta: " + segnale + (comune ? " · " + comune : "") + ". Scrivi il nome e salva.");
+});
+
+// ---------------- Radar di zona ----------------
+function renderRadar() {
+  const aperte = leads.filter(function (l) { return FASI_CHIUSE.indexOf(l.fase) === -1; });
+  const conteggi = {};
+  aperte.forEach(function (l) {
+    if (!l.comune) return;
+    conteggi[l.comune] = conteggi[l.comune] || { notizie: 0, radar: 0 };
+    conteggi[l.comune].notizie++;
+  });
+  radar.forEach(function (r) {
+    if (!r.comune) return;
+    conteggi[r.comune] = conteggi[r.comune] || { notizie: 0, radar: 0 };
+    conteggi[r.comune].radar++;
+  });
+  const zone = Object.keys(conteggi).map(function (c) {
+    return { comune: c, notizie: conteggi[c].notizie, radar: conteggi[c].radar, totale: conteggi[c].notizie + conteggi[c].radar };
+  }).sort(function (a, b) { return b.totale - a.totale; }).slice(0, 15);
+  $("zoneCalde").innerHTML = zone.length
+    ? '<div class="card"><table class="tab"><tr><th>Comune</th><th class="num">Notizie aperte</th><th class="num">Notizie di zona</th></tr>' +
+      zone.map(function (z) { return '<tr><td>' + esc(z.comune) + '</td><td class="num">' + z.notizie + '</td><td class="num">' + z.radar + '</td></tr>'; }).join("") +
+      '</table></div>'
+    : '<div class="vuoto">Ancora nessun dato per zona.</div>';
+
+  const comuni = [];
+  radar.forEach(function (r) { if (r.comune && comuni.indexOf(r.comune) === -1) comuni.push(r.comune); });
+  comuni.sort();
+  const selComune = $("radarComune").value;
+  $("radarComune").innerHTML = opzioni(comuni, comuni.indexOf(selComune) !== -1 ? selComune : "", "Tutti i comuni");
+  const filtroComune = $("radarComune").value;
+  const soloDaLeggere = $("radarStato").value === "nonlette";
+  const lista = radar.filter(function (r) {
+    if (filtroComune && r.comune !== filtroComune) return false;
+    if (soloDaLeggere && r.letto) return false;
+    return true;
+  });
+  $("listaRadar").innerHTML = lista.length ? lista.map(function (r) {
+    const link = linkSicuro(r.link);
+    return '<div class="card"' + (r.letto ? ' style="opacity:.6"' : "") + '>' +
+      '<div class="titolo">' + (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.titolo || "Notizia") + '</a>' : esc(r.titolo || "Notizia")) + '</div>' +
+      '<div class="sotto">' + esc([r.comune, formattaData(r.createdAt), r.ricerca].filter(Boolean).join(" · ")) + '</div>' +
+      (r.estratto ? '<div class="estratto">' + esc(r.estratto) + '</div>' : "") +
+      '<div class="azioni-card">' +
+        '<button type="button" class="btn secondario piccolo" data-radar-letto="' + esc(r.id) + '">' + (r.letto ? "↺ Da leggere" : "✓ Letta") + '</button>' +
+        '<button type="button" class="btn secondario piccolo" data-radar-elimina="' + esc(r.id) + '">🗑 Elimina</button>' +
+      '</div></div>';
+  }).join("") : '<div class="vuoto">Nessuna notizia di zona. Si riempirà automaticamente quando il radar sarà attivo.</div>';
+}
+
+async function segnaRadar(id) {
+  const r = radar.find(function (x) { return x.id === id; });
+  if (!r) return;
+  try {
+    await api("PATCH", "/radar/" + encodeURIComponent(id), { letto: !r.letto });
+    r.letto = !r.letto;
+    renderTutto();
+  } catch (e) { gestisciErrore(e); }
+}
+
+async function eliminaRadar(id) {
+  if (!confirm("Eliminare questa notizia di zona?")) return;
+  try {
+    await api("DELETE", "/radar/" + encodeURIComponent(id));
+    radar = radar.filter(function (x) { return x.id !== id; });
+    renderTutto();
+  } catch (e) { gestisciErrore(e); }
+}
+
+// ---------------- Amministratori ----------------
+function renderAmministratori() {
+  const q = $("cercaAmm").value.trim().toLowerCase();
+  const st = $("filtroStatoAmm").value;
+  const lista = amministratori.filter(function (a) {
+    if (st && a.stato !== st) return false;
+    if (q) {
+      const t = [a.nome, a.studio, a.zone, a.palazzi, a.note].join(" ").toLowerCase();
+      if (t.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  $("listaAmm").innerHTML = lista.length ? lista.map(cardAmmHTML).join("") : '<div class="vuoto">Nessun amministratore in rubrica.</div>';
+}
+
+function campiAmmHTML(a) {
+  a = a || {};
+  return '' +
+    '<label>Nome *<input id="a-nome" maxlength="200" required value="' + esc(a.nome) + '"></label>' +
+    '<label>Studio<input id="a-studio" maxlength="200" value="' + esc(a.studio) + '"></label>' +
+    '<div class="riga2">' +
+      '<label>Telefono<input id="a-telefono" type="tel" maxlength="50" value="' + esc(a.telefono) + '"></label>' +
+      '<label>Email<input id="a-email" type="email" maxlength="200" autocapitalize="off" value="' + esc(a.email) + '"></label>' +
+    '</div>' +
+    '<label>Indirizzo dello studio<input id="a-indirizzoStudio" maxlength="300" value="' + esc(a.indirizzoStudio) + '"></label>' +
+    '<label>Zone<input id="a-zone" maxlength="500" value="' + esc(a.zone) + '" placeholder="es. Sesto San Giovanni, Milano Niguarda"></label>' +
+    '<label>Palazzi gestiti (uno per riga)<textarea id="a-palazzi" maxlength="5000">' + esc(a.palazzi) + '</textarea></label>' +
+    '<label>Stato del rapporto<select id="a-stato">' + opzioni(STATI_AMM, a.stato || "Da contattare") + '</select></label>' +
+    '<div class="riga2">' +
+      '<label>Ultimo contatto<input id="a-dataUltimoContatto" type="date" value="' + esc(a.dataUltimoContatto) + '"></label>' +
+      '<label>Prossimo contatto<input id="a-dataProssimoContatto" type="date" value="' + esc(a.dataProssimoContatto) + '"></label>' +
+    '</div>' +
+    '<label>Note<textarea id="a-note" maxlength="5000">' + esc(a.note) + '</textarea></label>';
+}
+
+function leggiCampiAmm() {
+  const v = {};
+  ["nome", "studio", "telefono", "email", "indirizzoStudio", "zone", "palazzi", "stato", "dataUltimoContatto", "dataProssimoContatto", "note"].forEach(function (c) {
+    v[c] = $("a-" + c).value.trim();
+  });
+  return v;
+}
+
+$("btnNuovoAmm").addEventListener("click", function () { apriSchedaAmm(null); });
+
+function apriSchedaAmm(id) {
+  const a = id ? amministratori.find(function (x) { return x.id === id; }) : null;
+  if (id && !a) return;
+  schedaTipo = "amministratore";
+  schedaId = id;
+  $("schedaTitolo").textContent = a ? a.nome : "Nuovo amministratore";
+  let info = "";
+  if (a) {
+    const contatti = [];
+    if (a.telefono) contatti.push('<a href="tel:' + esc(a.telefono.replace(/\s+/g, "")) + '">📞 Chiama</a>');
+    if (a.email) contatti.push('<a href="mailto:' + esc(a.email) + '">✉️ Email</a>');
+    const collegate = leads.filter(function (l) { return l.amministratoreId === a.id; });
+    info = contatti.join(" · ") +
+      (collegate.length ? '<br>Notizie portate: ' + collegate.map(function (l) { return esc(l.nome) + " (" + esc(l.fase) + ")"; }).join(", ") : "");
+  }
+  $("schedaInfo").innerHTML = info;
+  $("formScheda").innerHTML = campiAmmHTML(a || {}) +
+    '<div class="azioni-scheda">' +
+      '<button type="submit" class="btn" id="btnSalvaScheda">💾 Salva</button>' +
+      '<button type="button" class="btn secondario" id="btnContattatoOggi">📞 Sentito oggi</button>' +
+      (a ? '<button type="button" class="btn pericolo" id="btnEliminaScheda">🗑 Elimina</button>' : "") +
+    '</div>';
+  apriModale();
+}
+
 // ---------------- Scheda notizia ----------------
 function apriScheda(id) {
   const l = leads.find(function (x) { return x.id === id; });
   if (!l) return;
+  schedaTipo = "notizia";
   schedaId = id;
   $("schedaTitolo").textContent = l.nome || "Scheda notizia";
-  const link = linkSicuro(l.facebookUrl);
-  $("schedaInfo").innerHTML = "Inserita il " + esc(formattaData(l.createdAt)) +
-    (link ? ' · <a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">Apri profilo Facebook ↗</a>' : "");
-  $("formScheda").innerHTML = campiLeadHTML("s", l) +
+  const info = ["Inserita il " + esc(formattaData(l.createdAt))];
+  if (typeof l.punteggio === "number") info.push("🔥 punteggio " + l.punteggio);
+  if (l.automatica) info.push("🤖 trovata in automatico" + (l.portale ? " su " + esc(l.portale) : ""));
+  if (l.prezzoIniziale && l.prezzo && l.prezzo < l.prezzoIniziale) info.push("prezzo iniziale " + esc(euro(l.prezzoIniziale)));
+  const fb = linkSicuro(l.facebookUrl);
+  const ann = linkSicuro(l.linkAnnuncio);
+  if (fb) info.push('<a href="' + esc(fb) + '" target="_blank" rel="noopener noreferrer">Apri Facebook ↗</a>');
+  if (ann) info.push('<a href="' + esc(ann) + '" target="_blank" rel="noopener noreferrer">Apri annuncio ↗</a>');
+  $("schedaInfo").innerHTML = info.join(" · ");
+  $("formScheda").innerHTML = campiNotiziaHTML("s", l) +
     '<div class="azioni-scheda">' +
       '<button type="submit" class="btn" id="btnSalvaScheda">💾 Salva</button>' +
       '<button type="button" class="btn pericolo" id="btnEliminaScheda">🗑 Elimina</button>' +
+      '<button type="button" class="btn scuro" id="btnBloccaScheda">🚫 Non ricontattare</button>' +
     '</div>';
+  apriModale();
+}
+
+function apriModale() {
   $("modale").hidden = false;
   document.body.style.overflow = "hidden";
   document.querySelector("#modale .foglio").scrollTop = 0;
@@ -603,6 +1129,7 @@ function apriScheda(id) {
 function chiudiScheda() {
   $("modale").hidden = true;
   document.body.style.overflow = "";
+  schedaTipo = null;
   schedaId = null;
 }
 
@@ -611,17 +1138,33 @@ $("modale").addEventListener("click", function (ev) { if (ev.target === $("modal
 
 $("formScheda").addEventListener("submit", async function (ev) {
   ev.preventDefault();
-  const dati = leggiCampi("s");
-  if (!dati.nome) { avviso("Il nome è obbligatorio", true); return; }
   const b = $("btnSalvaScheda");
   b.disabled = true;
   try {
-    const r = await api("PATCH", "/leads/" + encodeURIComponent(schedaId), dati);
-    const i = leads.findIndex(function (x) { return x.id === schedaId; });
-    if (i >= 0) leads[i] = r.lead;
+    if (schedaTipo === "notizia") {
+      const dati = leggiCampiNotizia("s");
+      if (!dati.nome) throw new Error("Il nome è obbligatorio");
+      const r = await api("PATCH", "/leads/" + encodeURIComponent(schedaId), dati);
+      const i = leads.findIndex(function (x) { return x.id === schedaId; });
+      if (i >= 0) leads[i] = r.lead;
+      avviso("✅ Modifiche salvate");
+    } else if (schedaTipo === "amministratore") {
+      const dati = leggiCampiAmm();
+      if (!dati.nome) throw new Error("Il nome è obbligatorio");
+      if (schedaId) {
+        const r = await api("PATCH", "/amministratori/" + encodeURIComponent(schedaId), dati);
+        const i = amministratori.findIndex(function (x) { return x.id === schedaId; });
+        if (i >= 0) amministratori[i] = r.amministratore;
+      } else {
+        const r = await api("POST", "/amministratori", dati);
+        amministratori.push(r.amministratore);
+        amministratori.sort(function (x, y) { return String(x.nome).localeCompare(String(y.nome), "it"); });
+      }
+      aggiornaSelectAmministratori();
+      avviso("✅ Amministratore salvato");
+    }
     chiudiScheda();
     renderTutto();
-    avviso("✅ Modifiche salvate");
   } catch (e) {
     gestisciErrore(e);
     b.disabled = false;
@@ -629,18 +1172,84 @@ $("formScheda").addEventListener("submit", async function (ev) {
 });
 
 $("formScheda").addEventListener("click", async function (ev) {
-  if (!ev.target.closest("#btnEliminaScheda")) return;
-  const l = leads.find(function (x) { return x.id === schedaId; });
-  if (!l) return;
-  if (!confirm('Eliminare definitivamente la notizia "' + l.nome + '"?\nL\'operazione non si può annullare.')) return;
+  const t = ev.target;
+  if (t.closest("#btnContattatoOggi")) {
+    $("a-dataUltimoContatto").value = oggiISO();
+    if ($("a-stato").value === "Da contattare") $("a-stato").value = "Conosciuto";
+    avviso("Data aggiornata: premi Salva per confermare");
+    return;
+  }
+  if (t.closest("#btnEliminaScheda")) {
+    if (schedaTipo === "notizia") {
+      const l = leads.find(function (x) { return x.id === schedaId; });
+      if (!l || !confirm('Eliminare definitivamente la notizia "' + l.nome + '"?\nL\'operazione non si può annullare.')) return;
+      try {
+        await api("DELETE", "/leads/" + encodeURIComponent(l.id));
+        leads = leads.filter(function (x) { return x.id !== l.id; });
+        chiudiScheda(); renderTutto(); avviso("Notizia eliminata");
+      } catch (e) { gestisciErrore(e); }
+    } else if (schedaTipo === "amministratore") {
+      const a = amministratori.find(function (x) { return x.id === schedaId; });
+      if (!a || !confirm('Eliminare "' + a.nome + '" dalla rubrica?')) return;
+      try {
+        await api("DELETE", "/amministratori/" + encodeURIComponent(a.id));
+        amministratori = amministratori.filter(function (x) { return x.id !== a.id; });
+        aggiornaSelectAmministratori();
+        chiudiScheda(); renderTutto(); avviso("Amministratore eliminato");
+      } catch (e) { gestisciErrore(e); }
+    }
+    return;
+  }
+  if (t.closest("#btnBloccaScheda")) {
+    const l = leads.find(function (x) { return x.id === schedaId; });
+    if (!l) return;
+    if (!confirm("NON RICONTATTARE\n\nLa notizia \"" + l.nome + "\" verrà eliminata e i suoi link (profilo Facebook / annuncio) verranno bloccati: se ricompariranno, Hunter li scarterà.\n\nProcedere?")) return;
+    try {
+      const r = await api("POST", "/leads/" + encodeURIComponent(l.id) + "/blocca");
+      leads = leads.filter(function (x) { return x.id !== l.id; });
+      chiudiScheda(); renderTutto();
+      if (r.linkBloccati) avviso("🚫 Notizia eliminata e " + r.linkBloccati + " link bloccati");
+      else avviso("Notizia eliminata. Attenzione: non aveva link, quindi non potrà essere riconosciuta in futuro.", true);
+    } catch (e) { gestisciErrore(e); }
+  }
+});
+
+// ---------------- Impostazioni ----------------
+function riempiImpostazioni() {
+  $("impZone").value = impostazioni.zonePreferite.join("\n");
+  $("impParole").value = impostazioni.paroleChiave.join("\n");
+  $("impGruppi").value = impostazioni.gruppiFacebook.map(function (g) { return g.nome + " | " + g.url; }).join("\n");
+}
+
+function righe(testo) {
+  return String(testo || "").split("\n").map(function (r) { return r.trim(); }).filter(Boolean);
+}
+
+$("btnSalvaImp").addEventListener("click", async function () {
+  const gruppi = [];
+  for (const r of righe($("impGruppi").value)) {
+    let nome = "", url = r;
+    if (r.indexOf("|") !== -1) {
+      nome = r.split("|")[0].trim();
+      url = r.split("|").slice(1).join("|").trim();
+    }
+    url = conLinkCompleto(url).replace(/^http:\/\//i, "https://");
+    gruppi.push({ nome: nome || url, url: url });
+  }
+  const dati = { zonePreferite: righe($("impZone").value), paroleChiave: righe($("impParole").value), gruppiFacebook: gruppi };
+  const b = $("btnSalvaImp");
+  b.disabled = true;
   try {
-    await api("DELETE", "/leads/" + encodeURIComponent(l.id));
-    leads = leads.filter(function (x) { return x.id !== l.id; });
-    chiudiScheda();
-    renderTutto();
-    avviso("Notizia eliminata");
+    const r = await api("PUT", "/impostazioni", dati);
+    impostazioni = r.impostazioni;
+    riempiImpostazioni();
+    aggiornaDatalistComuni();
+    await caricaTutto();
+    avviso("✅ Impostazioni salvate");
   } catch (e) {
     gestisciErrore(e);
+  } finally {
+    b.disabled = false;
   }
 });
 
