@@ -4,31 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hunter">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#111827">
+<meta name="color-scheme" content="dark">
 <title>Hunter</title>
 <style>
 :root{
-  --blu:#1f3a5f; --blu2:#2c5282; --sfondo:#f2f4f7; --card:#ffffff; --testo:#1a202c;
-  --grigio:#6b7280; --bordo:#d9dee5; --verde:#2f855a; --rosso:#c53030;
+  color-scheme:dark;
+  --sfondo:#0f1115; --card:#1a1d24; --card2:#15181e; --campo:#111318;
+  --testo:#e5e7eb; --testo2:#cbd5e1; --grigio:#9ca3af; --bordo:#2d323c;
+  --accento:#60a5fa; --pulsante:#2563eb; --intestazione:#111827;
+  --verde:#4ade80; --rosso:#f87171;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--sfondo);color:var(--testo);font-size:16px;line-height:1.4;overflow-x:hidden;-webkit-text-size-adjust:100%;}
 [hidden]{display:none !important;}
 button{font:inherit;cursor:pointer;}
-a{color:var(--blu2);}
-input,select,textarea{font:inherit;font-size:16px;width:100%;padding:10px 12px;border:1px solid var(--bordo);border-radius:10px;background:#fff;color:var(--testo);}
+a{color:#93c5fd;}
+input,select,textarea{font:inherit;font-size:16px;width:100%;padding:10px 12px;border:1px solid var(--bordo);border-radius:10px;background:var(--campo);color:var(--testo);}
+input::placeholder,textarea::placeholder{color:#6b7280;}
 textarea{min-height:90px;resize:vertical;}
-label{display:block;font-size:14px;font-weight:600;color:#374151;margin-bottom:12px;}
+label{display:block;font-size:14px;font-weight:600;color:var(--testo2);margin-bottom:12px;}
 label input,label select,label textarea{margin-top:4px;font-weight:400;}
 label.check{display:flex;align-items:center;gap:10px;font-size:16px;}
-label.check input{width:22px;height:22px;margin:0;flex-shrink:0;}
+label.check input{width:22px;height:22px;margin:0;flex-shrink:0;accent-color:var(--pulsante);}
 .riga2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;}
 .testo-aiuto{font-size:13px;color:var(--grigio);margin:-4px 0 12px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font-weight:600;background:var(--blu);color:#fff;text-decoration:none;}
-.btn.secondario{background:#e5e9f0;color:var(--blu);}
-.btn.pericolo{background:var(--rosso);color:#fff;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font-weight:600;background:var(--pulsante);color:#fff;text-decoration:none;}
+.btn.secondario{background:#2a2f3a;color:var(--testo2);}
+.btn.pericolo{background:#b91c1c;color:#fff;}
 .btn.scuro{background:#7c2d12;color:#fff;}
 .btn.piccolo{padding:7px 10px;font-size:14px;border-radius:8px;}
 .btn.largo{width:100%;}
@@ -36,56 +42,57 @@ label.check input{width:22px;height:22px;margin:0;flex-shrink:0;}
 
 /* ---------- Accesso ---------- */
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;}
-.box-login{width:100%;max-width:380px;background:var(--card);border-radius:16px;padding:28px 20px;box-shadow:0 4px 20px rgba(0,0,0,.08);text-align:center;}
-.box-login h1{margin:0 0 4px;color:var(--blu);font-size:32px;}
+.box-login{width:100%;max-width:380px;background:var(--card);border:1px solid var(--bordo);border-radius:16px;padding:28px 20px;box-shadow:0 4px 24px rgba(0,0,0,.4);text-align:center;}
+.box-login h1{margin:0 0 4px;color:var(--accento);font-size:32px;}
 .box-login p{margin:0 0 20px;color:var(--grigio);font-size:14px;}
 .box-login label{text-align:left;}
 .errore{color:var(--rosso);font-size:14px;min-height:20px;margin:8px 0;}
 
 /* ---------- Intestazione ---------- */
-header{position:sticky;top:0;z-index:10;background:var(--blu);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:8px;}
-header h1{font-size:20px;margin:0;flex:1;}
-header h1 small{font-size:12px;font-weight:400;opacity:.7;}
-header button{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:14px;}
+header{position:sticky;top:0;z-index:10;background:var(--intestazione);border-bottom:1px solid var(--bordo);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:8px;}
+header h1{font-size:20px;margin:0;flex:1;color:var(--accento);}
+header h1 small{font-size:12px;font-weight:400;opacity:.7;color:var(--grigio);}
+header button{background:#1f2937;color:var(--testo2);border:1px solid var(--bordo);border-radius:8px;padding:6px 10px;font-size:14px;}
 main{max-width:720px;margin:0 auto;padding:16px 16px calc(90px + env(safe-area-inset-bottom));}
-h2{font-size:20px;margin:4px 0 14px;color:var(--blu);}
-h3{font-size:16px;margin:20px 0 8px;color:#374151;}
+h2{font-size:20px;margin:4px 0 14px;color:var(--accento);}
+h3{font-size:16px;margin:20px 0 8px;color:var(--testo2);}
 p.info,.info{font-size:13px;color:var(--grigio);margin:0 0 12px;}
 
 /* ---------- Barra in basso ---------- */
-nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid var(--bordo);display:flex;padding-bottom:env(safe-area-inset-bottom);}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--intestazione);border-top:1px solid var(--bordo);display:flex;padding-bottom:env(safe-area-inset-bottom);}
 nav button{flex:1;border:none;background:none;padding:8px 2px 10px;font-size:11px;color:var(--grigio);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
 nav button .ico{font-size:20px;line-height:1;}
-nav button.attivo{color:var(--blu);font-weight:700;}
+nav button.attivo{color:var(--accento);font-weight:700;}
 
 /* ---------- Card ---------- */
-.card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-wrap:anywhere;}
+.card{background:var(--card);border:1px solid var(--bordo);border-radius:12px;padding:12px 14px;margin-bottom:10px;overflow-wrap:anywhere;}
 .card.cliccabile{cursor:pointer;}
-.card .titolo{font-weight:700;font-size:16px;}
+.card .titolo{font-weight:700;font-size:16px;color:var(--testo);}
 .card .sotto{color:var(--grigio);font-size:14px;margin-top:2px;}
-.card .estratto{font-size:14px;margin-top:6px;color:#374151;}
+.card .estratto{font-size:14px;margin-top:6px;color:var(--testo2);}
 .riga-badge{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:#e5e9f0;color:#374151;}
-.badge.alta{background:#fed7d7;color:var(--rosso);}
-.badge.media{background:#feebc8;color:#9c4221;}
-.badge.bassa{background:#e2e8f0;color:#4a5568;}
-.badge.fase{background:#dbeafe;color:#1e40af;}
-.badge.ok{background:#c6f6d5;color:var(--verde);}
-.badge.punti{background:#ffedd5;color:#c2410c;}
-.badge.auto{background:#ede9fe;color:#5b21b6;}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:#2a2f3a;color:#d1d5db;}
+.badge.alta{background:#4c1d1d;color:#fca5a5;}
+.badge.media{background:#4a2c12;color:#fdba74;}
+.badge.bassa{background:#2a2f3a;color:#9ca3af;}
+.badge.fase{background:#1e3a5f;color:#93c5fd;}
+.badge.ok{background:#14361f;color:#86efac;}
+.badge.punti{background:#4a2a0f;color:#fdba74;}
+.badge.auto{background:#2e1f4d;color:#c4b5fd;}
 
 /* ---------- Dashboard ---------- */
 .griglia{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.numero{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-.numero .val{font-size:28px;font-weight:800;color:var(--blu);}
+.numero{background:var(--card);border:1px solid var(--bordo);border-radius:12px;padding:14px;}
+.numero .val{font-size:28px;font-weight:800;color:var(--accento);}
 .numero .lab{font-size:13px;color:var(--grigio);}
 .barra-riga{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px;}
 .barra-riga .nome{width:122px;flex-shrink:0;}
-.barra-riga .barra{flex:1;background:#e5e9f0;border-radius:6px;height:12px;overflow:hidden;}
-.barra-riga .barra span{display:block;height:100%;background:var(--blu2);}
+.barra-riga .barra{flex:1;background:#2a2f3a;border-radius:6px;height:12px;overflow:hidden;}
+.barra-riga .barra span{display:block;height:100%;background:var(--pulsante);}
 .barra-riga .cont{width:32px;text-align:right;font-weight:700;}
 table.tab{width:100%;border-collapse:collapse;font-size:14px;}
 table.tab th,table.tab td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--bordo);}
+table.tab th{color:var(--grigio);font-weight:600;}
 table.tab .num{text-align:right;}
 
 /* ---------- Filtri ---------- */
@@ -94,36 +101,36 @@ table.tab .num{text-align:right;}
 .barra-azioni{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--grigio);}
 
 /* ---------- Trattative ---------- */
-details.colonna{background:var(--card);border-radius:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-details.colonna summary{padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;}
+details.colonna{background:var(--card);border:1px solid var(--bordo);border-radius:12px;margin-bottom:10px;}
+details.colonna summary{padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;color:var(--testo);}
 details.colonna summary::-webkit-details-marker{display:none;}
 details.colonna .contenuto{padding:0 10px 6px;}
-details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--bordo);}
+details.colonna .card{background:var(--card2);}
 .frecce{display:flex;gap:8px;margin-top:10px;}
 .frecce .btn{flex:1;}
 .vuoto{color:var(--grigio);font-size:14px;padding:8px 4px 12px;}
 
 /* ---------- Altro / Ricerca ---------- */
 .menu-altro{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.menu-altro button{background:var(--card);border:none;border-radius:12px;padding:18px 10px;font-size:15px;font-weight:700;color:var(--blu);box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;gap:6px;}
+.menu-altro button{background:var(--card);border:1px solid var(--bordo);border-radius:12px;padding:18px 10px;font-size:15px;font-weight:700;color:var(--accento);display:flex;flex-direction:column;align-items:center;gap:6px;}
 .menu-altro .ico{font-size:28px;}
-.chip{display:inline-block;padding:8px 12px;border-radius:999px;background:#dbeafe;color:#1e40af;font-size:14px;font-weight:600;text-decoration:none;}
+.chip{display:inline-block;padding:8px 12px;border-radius:999px;background:#1e3a5f;color:#bfdbfe;font-size:14px;font-weight:600;text-decoration:none;}
 .canali{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.canale{background:var(--card);border-radius:12px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:6px;}
+.canale{background:var(--card);border:1px solid var(--bordo);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;}
 .canale .chip{text-align:center;}
 .canale .ultima{font-size:12px;color:var(--grigio);text-align:center;}
 .giro-riga{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bordo);font-size:15px;}
 .giro-riga:last-child{border-bottom:none;}
-.giro-riga input{width:22px;height:22px;margin:0;flex-shrink:0;}
+.giro-riga input{width:22px;height:22px;margin:0;flex-shrink:0;accent-color:var(--pulsante);}
 .giro-riga .nome{flex:1;}
 .giro-riga .fatto{color:var(--verde);text-decoration:line-through;}
-.giro-riga button{background:#e5e9f0;border:none;border-radius:6px;padding:4px 8px;color:var(--blu);font-size:13px;}
+.giro-riga button{background:#2a2f3a;border:none;border-radius:6px;padding:4px 8px;color:var(--testo2);font-size:13px;}
 .azioni-card{display:flex;gap:8px;margin-top:10px;}
 .azioni-card .btn{flex:1;}
 
 /* ---------- Scheda (finestra dal basso) ---------- */
-#modale{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;}
-.foglio{background:var(--sfondo);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));}
+#modale{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center;}
+.foglio{background:var(--sfondo);border-top:1px solid var(--bordo);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));}
 .foglio-testa{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
 .foglio-testa h2{margin:0;flex:1;overflow-wrap:anywhere;}
 .azioni-scheda{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
@@ -131,8 +138,8 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 .info a{font-weight:600;}
 
 /* ---------- Avvisi ---------- */
-#avviso{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:30;max-width:480px;margin:0 auto;padding:12px 16px;border-radius:10px;background:#1a202c;color:#fff;text-align:center;font-size:15px;box-shadow:0 4px 16px rgba(0,0,0,.25);}
-#avviso.errore-avviso{background:var(--rosso);}
+#avviso{position:fixed;left:16px;right:16px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:30;max-width:480px;margin:0 auto;padding:12px 16px;border-radius:10px;background:#374151;color:#fff;border:1px solid #4b5563;text-align:center;font-size:15px;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+#avviso.errore-avviso{background:#991b1b;border-color:#b91c1c;}
 .caricamento{text-align:center;color:var(--grigio);padding:24px;}
 </style>
 </head>
@@ -154,7 +161,7 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.1</small></h1>
+    <h1>Hunter <small>v1.2</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -305,10 +312,10 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.1 (ricerca multi-canale)
+// HUNTER - app web - versione 1.2 (tema scuro)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.1";
+const VERSIONE_APP = "1.2";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -333,7 +340,7 @@ const REGOLE_SEGNALI = [
 const REGEX_VENDITA = /vendo\s+(casa|appartamento|monolocale|bilocale|trilocale|quadrilocale|villa|attico)|vendesi|vendita\s+(da\s+)?privat/i;
 const REGEX_NO_AGENZIE = /(no|niente|astenersi|esclus[ei])\s+(perditempo\s+(e|o|ed)\s+)?agenzi|no\s+intermediari|non\s+agenzie|solo\s+privati/i;
 
-// ---------------- Canali di ricerca (proposta 15) ----------------
+// ---------------- Canali di ricerca ----------------
 function enc(s) { return encodeURIComponent(s); }
 function google(q, periodo) { return "https://www.google.com/search?q=" + enc(q) + "&tbs=qdr:" + periodo; }
 function googleSito(sito, p, z, periodo) { return google("site:" + sito + ' "' + p + '" "' + z + '"', periodo); }
@@ -677,14 +684,12 @@ function leggiCampiNotizia(p) {
 document.addEventListener("change", function (ev) {
   const t = ev.target;
   if (!t) return;
-  // Dalla fase "Contattato" in poi si spunta "Già contattato"
   if (t.id && /-fase$/.test(t.id)) {
     const p = t.id.split("-")[0];
     if (FASI.indexOf(t.value) >= FASI.indexOf("Contattato") && $(p + "-contattato")) {
       $(p + "-contattato").checked = true;
     }
   }
-  // Spunte del giro quotidiano
   if (t.dataset && t.dataset.giro) {
     const g = statoGiro();
     if (t.checked) g.fatti[t.dataset.giro] = true; else delete g.fatti[t.dataset.giro];
@@ -693,8 +698,7 @@ document.addEventListener("change", function (ev) {
   }
 });
 
-// ---------------- Controllo doppioni (proposta 18) ----------------
-// Restituisce true se si può procedere, false se l'utente rinuncia
+// ---------------- Controllo doppioni ----------------
 async function controllaDoppioni(dati, conferme) {
   const c = await api("POST", "/controlla", dati);
   if (c.bloccato) {
@@ -1024,7 +1028,7 @@ async function spostaFase(id, delta) {
   }
 }
 
-// ---------------- Ricerca multi-canale (proposte 15 e 17) ----------------
+// ---------------- Ricerca multi-canale ----------------
 function urlGruppo(u) { return String(u || "").split("?")[0].split("#")[0].replace(/\/+$/, ""); }
 
 function zonaScelta() { return $("ricercaZona").value || "Milano"; }
@@ -1086,7 +1090,6 @@ function renderGruppi() {
   }).join("") + '</div>';
 }
 
-// Giro quotidiano
 function statoGiro() {
   const g = leggiLocale("hunterGiro", null);
   if (!g || g.data !== oggiISO()) return { data: oggiISO(), fatti: {} };
@@ -1139,7 +1142,6 @@ function renderGiro() {
     }).join("");
 }
 
-// Incolla e analizza
 $("btnAnalizza").addEventListener("click", async function () {
   const testo = $("testoPost").value.trim();
   const link = conLinkCompleto($("linkPost").value);
@@ -1239,7 +1241,7 @@ function renderRadar() {
   });
   $("listaRadar").innerHTML = lista.length ? lista.map(function (r) {
     const link = linkSicuro(r.link);
-    return '<div class="card"' + (r.letto ? ' style="opacity:.6"' : "") + '>' +
+    return '<div class="card"' + (r.letto ? ' style="opacity:.55"' : "") + '>' +
       '<div class="titolo">' + (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.titolo || "Notizia") + '</a>' : esc(r.titolo || "Notizia")) + '</div>' +
       '<div class="sotto">' + esc([r.comune, formattaData(r.createdAt), r.ricerca].filter(Boolean).join(" · ")) + '</div>' +
       (r.estratto ? '<div class="estratto">' + esc(r.estratto) + '</div>' : "") +
