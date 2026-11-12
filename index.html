@@ -107,8 +107,17 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 .menu-altro{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .menu-altro button{background:var(--card);border:none;border-radius:12px;padding:18px 10px;font-size:15px;font-weight:700;color:var(--blu);box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;gap:6px;}
 .menu-altro .ico{font-size:28px;}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-.chip{display:inline-block;padding:7px 12px;border-radius:999px;background:#dbeafe;color:#1e40af;font-size:14px;font-weight:600;text-decoration:none;}
+.chip{display:inline-block;padding:8px 12px;border-radius:999px;background:#dbeafe;color:#1e40af;font-size:14px;font-weight:600;text-decoration:none;}
+.canali{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.canale{background:var(--card);border-radius:12px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:6px;}
+.canale .chip{text-align:center;}
+.canale .ultima{font-size:12px;color:var(--grigio);text-align:center;}
+.giro-riga{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bordo);font-size:15px;}
+.giro-riga:last-child{border-bottom:none;}
+.giro-riga input{width:22px;height:22px;margin:0;flex-shrink:0;}
+.giro-riga .nome{flex:1;}
+.giro-riga .fatto{color:var(--verde);text-decoration:line-through;}
+.giro-riga button{background:#e5e9f0;border:none;border-radius:6px;padding:4px 8px;color:var(--blu);font-size:13px;}
 .azioni-card{display:flex;gap:8px;margin-top:10px;}
 .azioni-card .btn{flex:1;}
 
@@ -145,7 +154,7 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.0</small></h1>
+    <h1>Hunter <small>v1.1</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -187,7 +196,7 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
     <section id="sez-altro" hidden>
       <h2>Altro</h2>
       <div class="menu-altro">
-        <button type="button" data-vai="ricerca"><span class="ico">🔎</span>Ricerca Facebook</button>
+        <button type="button" data-vai="ricerca"><span class="ico">🔎</span>Ricerca</button>
         <button type="button" data-vai="radar"><span class="ico">📡</span>Radar di zona</button>
         <button type="button" data-vai="amministratori"><span class="ico">🏢</span>Amministratori</button>
         <button type="button" data-vai="impostazioni"><span class="ico">⚙️</span>Impostazioni</button>
@@ -195,24 +204,36 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
     </section>
 
     <section id="sez-ricerca" hidden>
-      <h2>🔎 Ricerca Facebook</h2>
-      <p class="info">Hunter prepara le ricerche: un tocco apre Facebook già filtrato. Quando trovi un post interessante, copialo e incollalo qui sotto: Hunter lo analizza e prepara la notizia.</p>
-      <h3>Nei tuoi gruppi</h3>
+      <h2>🔎 Ricerca</h2>
+      <h3 style="margin-top:4px">✅ Giro quotidiano</h3>
+      <div class="card" id="giro"></div>
+
+      <h3>Cerca su tutti i canali</h3>
+      <p class="info">Scegli zona e parola: ogni pulsante apre la ricerca già pronta. Sotto ogni pulsante vedi quando l'hai usato l'ultima volta: scorri i risultati solo fino a lì.</p>
+      <div class="riga2">
+        <label>Zona<select id="ricercaZona"></select></label>
+        <label>Parola chiave<select id="ricercaParola"></select></label>
+      </div>
+      <div class="canali" id="ricercaCanali"></div>
+
+      <h3>Facebook – nei tuoi gruppi</h3>
       <div id="ricercaGruppi"></div>
-      <h3>In tutto Facebook, per zona</h3>
-      <select id="ricercaZona"></select>
-      <div class="chips" id="ricercaChipsZona"></div>
-      <h3>🧠 Incolla un post</h3>
+
+      <h3>🧠 Incolla un post o un annuncio</h3>
       <div class="card">
-        <label>Testo del post<textarea id="testoPost" placeholder="Incolla qui il testo copiato da Facebook…"></textarea></label>
-        <label>Link al post o al profilo (facoltativo)<input id="linkPost" inputmode="url" autocapitalize="off" placeholder="https://facebook.com/..."></label>
-        <button type="button" class="btn largo" id="btnAnalizza">🧠 Analizza e prepara la notizia</button>
+        <label>Testo<textarea id="testoPost" placeholder="Incolla qui il testo copiato…"></textarea></label>
+        <label>Link al post, profilo o annuncio<input id="linkPost" inputmode="url" autocapitalize="off" placeholder="https://..."></label>
+        <label>Canale<select id="fontePost"></select></label>
+        <div class="azioni-card">
+          <button type="button" class="btn" id="btnAnalizza">🧠 Analizza e prepara</button>
+          <button type="button" class="btn secondario" id="btnScarta">🗑 Scarta questo link</button>
+        </div>
       </div>
     </section>
 
     <section id="sez-radar" hidden>
       <h2>📡 Radar di zona</h2>
-      <p class="info">Le notizie locali raccolte automaticamente (chiusure, trasferimenti di aziende, cantieri…) e le zone dove si concentrano le vostre notizie.</p>
+      <p class="info">Le notizie locali raccolte automaticamente e le zone dove si concentrano le vostre notizie.</p>
       <h3>🔥 Zone calde</h3>
       <div id="zoneCalde"></div>
       <h3>Notizie di zona</h3>
@@ -240,8 +261,8 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
       <h2>⚙️ Impostazioni</h2>
       <div class="card">
         <label>Zone preferite (un comune per riga)<textarea id="impZone" placeholder="Milano&#10;Sesto San Giovanni&#10;Cinisello Balsamo"></textarea></label>
-        <div class="testo-aiuto">Le notizie in queste zone ricevono +10 punti. Servono anche al riconoscimento automatico del comune.</div>
-        <label>Parole chiave per la ricerca Facebook (una per riga)<textarea id="impParole"></textarea></label>
+        <div class="testo-aiuto">Le notizie in queste zone ricevono +10 punti. Servono anche al riconoscimento automatico del comune e al menu Zona della Ricerca.</div>
+        <label>Parole chiave per la ricerca (una per riga)<textarea id="impParole"></textarea></label>
         <label>Gruppi Facebook (uno per riga: Nome | link)<textarea id="impGruppi" placeholder="Sei di Sesto se... | https://www.facebook.com/groups/123456789"></textarea></label>
         <div class="testo-aiuto">Il link si copia dalla barra degli indirizzi aprendo il gruppo su Facebook.</div>
         <button type="button" class="btn largo" id="btnSalvaImp">💾 Salva impostazioni</button>
@@ -284,14 +305,15 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.0 (radar)
+// HUNTER - app web - versione 1.1 (ricerca multi-canale)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.0";
+const VERSIONE_APP = "1.1";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
-const FONTI = ["Facebook", "Portale", "Amministratore", "Passaparola", "Radar di zona", "Altro"];
+const FONTI = ["Facebook", "Instagram", "LinkedIn", "Annunci", "Portale", "Web", "Amministratore", "Passaparola", "Radar di zona", "Altro"];
+const FONTI_SOCIAL = ["Facebook", "Instagram", "LinkedIn"];
 const STATI_AMM = ["Da contattare", "Conosciuto", "Collaboratore"];
 const FASI_CHIUSE = ["Incarico", "Venduto"];
 const CHIAVE_MEMORIA = "hunterKey";
@@ -308,7 +330,30 @@ const REGOLE_SEGNALI = [
   ["Trasloco", /trasloc/i],
   ["Cambio casa", /casa pi[uù] grande|casa pi[uù] piccola|pi[uù] spazio|arriva un bimb|aspettiamo un/i]
 ];
+const REGEX_VENDITA = /vendo\s+(casa|appartamento|monolocale|bilocale|trilocale|quadrilocale|villa|attico)|vendesi|vendita\s+(da\s+)?privat/i;
 const REGEX_NO_AGENZIE = /(no|niente|astenersi|esclus[ei])\s+(perditempo\s+(e|o|ed)\s+)?agenzi|no\s+intermediari|non\s+agenzie|solo\s+privati/i;
+
+// ---------------- Canali di ricerca (proposta 15) ----------------
+function enc(s) { return encodeURIComponent(s); }
+function google(q, periodo) { return "https://www.google.com/search?q=" + enc(q) + "&tbs=qdr:" + periodo; }
+function googleSito(sito, p, z, periodo) { return google("site:" + sito + ' "' + p + '" "' + z + '"', periodo); }
+function hashtag(s) { return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, ""); }
+const FILTRO_RECENTI = btoa(JSON.stringify({ "recent_posts:0": JSON.stringify({ name: "recent_posts", args: "" }) }));
+
+const CANALI = [
+  { k: "fb_gruppi", nome: "Facebook – gruppi", fonte: "Facebook", soloGiro: true },
+  { k: "fb_post", nome: "Facebook – post recenti", fonte: "Facebook", url: function (p, z) { return "https://www.facebook.com/search/posts/?q=" + enc(p + " " + z) + "&filters=" + enc(FILTRO_RECENTI); } },
+  { k: "fb_market", nome: "Marketplace", fonte: "Facebook", url: function (p, z) { return "https://www.facebook.com/marketplace/search/?query=" + enc(p + " " + z); } },
+  { k: "subito", nome: "Subito", fonte: "Annunci", url: function (p, z) { return googleSito("subito.it", p, z, "w"); } },
+  { k: "secondamano", nome: "Secondamano", fonte: "Annunci", url: function (p, z) { return googleSito("secondamano.it", p, z, "m"); } },
+  { k: "wallabakeca", nome: "Wallapop / Bakeca", fonte: "Annunci", url: function (p, z) { return google('(site:wallapop.com OR site:bakeca.it) "' + p + '" "' + z + '"', "m"); } },
+  { k: "cessioni", nome: "Cessioni attività", fonte: "Annunci", url: function (p, z) { return google('("cedo attività" OR "cessione attività" OR "vendo attività") "' + z + '"', "m"); } },
+  { k: "reddit", nome: "Reddit r/milano", fonte: "Web", url: function (p, z) { return "https://www.reddit.com/r/milano/search/?q=" + enc(p) + "&sort=new"; } },
+  { k: "linkedin", nome: "LinkedIn – post", fonte: "LinkedIn", url: function (p, z) { return "https://www.linkedin.com/search/results/content/?keywords=" + enc(p + " " + z) + "&sortBy=" + enc('["date_posted"]'); } },
+  { k: "instagram", nome: "Instagram – hashtag", fonte: "Instagram", url: function (p, z) { return "https://www.instagram.com/explore/tags/" + hashtag(p + z) + "/"; } },
+  { k: "google", nome: "Google – 7 giorni", fonte: "Web", url: function (p, z) { return google('"' + p + '" "' + z + '"', "w"); } },
+  { k: "news", nome: "Google News – zona", fonte: "Radar di zona", url: function (p, z) { return "https://news.google.com/search?q=" + enc(z + " chiusura OR trasferimento OR cantiere") + "&hl=it&gl=IT&ceid=IT%3Ait"; } }
+];
 
 let password = "";
 let leads = [];
@@ -318,6 +363,8 @@ let impostazioni = { zonePreferite: [], paroleChiave: [], gruppiFacebook: [] };
 let versioneWorker = "";
 let schedaTipo = null;
 let schedaId = null;
+let ultimoCanale = "";
+let confermeNuovo = { ids: [], scartato: false };
 const fasiChiuse = new Set();
 
 // ---------------- Utilità ----------------
@@ -344,9 +391,21 @@ function formattaGiorno(g) {
   return p[2] + "/" + p[1] + "/" + p[0];
 }
 
-function oggiISO() {
-  const d = new Date();
+function dataLocale(d) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function oggiISO() { return dataLocale(new Date()); }
+
+function formattaUltima(iso) {
+  if (!iso) return "mai usata";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "mai usata";
+  const ora = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  const giorno = dataLocale(d);
+  const ieri = new Date(); ieri.setDate(ieri.getDate() - 1);
+  if (giorno === oggiISO()) return "ultima: oggi " + ora;
+  if (giorno === dataLocale(ieri)) return "ultima: ieri " + ora;
+  return "ultima: " + String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + " " + ora;
 }
 
 function euro(n) { return Number(n).toLocaleString("it-IT") + " €"; }
@@ -359,6 +418,16 @@ function conLinkCompleto(u) {
   u = String(u || "").trim();
   if (u && !/^https?:\/\//i.test(u)) u = "https://" + u;
   return u;
+}
+
+function fonteDaLink(u) {
+  const s = String(u || "").toLowerCase();
+  if (!s) return "";
+  if (/facebook\.com|fb\.com|fb\.me/.test(s)) return "Facebook";
+  if (/instagram\.com/.test(s)) return "Instagram";
+  if (/linkedin\.com/.test(s)) return "LinkedIn";
+  if (/subito\.it|secondamano\.it|wallapop\.com|bakeca\.it|immobiliare\.it|idealista\.it|casa\.it/.test(s)) return "Annunci";
+  return "Web";
 }
 
 function avviso(msg, errore) {
@@ -390,6 +459,12 @@ function trovaComune(testo) {
 }
 
 // ---------------- Memoria del dispositivo ----------------
+function leggiLocale(chiave, predefinito) {
+  try { const v = localStorage.getItem(chiave); return v ? JSON.parse(v) : predefinito; } catch (e) { return predefinito; }
+}
+function scriviLocale(chiave, valore) {
+  try { localStorage.setItem(chiave, JSON.stringify(valore)); } catch (e) {}
+}
 function leggiPassword() { try { return localStorage.getItem(CHIAVE_MEMORIA) || ""; } catch (e) { return ""; } }
 function salvaPassword(p) { try { localStorage.setItem(CHIAVE_MEMORIA, p); } catch (e) {} }
 function cancellaPassword() { try { localStorage.removeItem(CHIAVE_MEMORIA); } catch (e) {} }
@@ -564,8 +639,8 @@ function campiNotiziaHTML(p, l) {
       '<label>Amministratore<select id="' + p + '-amministratoreId">' + opzioniAmministratori(l.amministratoreId || "") + '</select></label>' +
     '</div>' +
     '<label>Gruppo / ricerca / dettaglio fonte<input id="' + p + '-gruppo" maxlength="200" value="' + esc(l.gruppo) + '"></label>' +
-    '<label>Link profilo o post Facebook<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://facebook.com/..."></label>' +
-    '<label>Link annuncio (portali)<input id="' + p + '-linkAnnuncio" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.linkAnnuncio) + '" placeholder="https://..."></label>' +
+    '<label>Link profilo o post (Facebook, Instagram, LinkedIn)<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://..."></label>' +
+    '<label>Link annuncio o pagina web<input id="' + p + '-linkAnnuncio" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.linkAnnuncio) + '" placeholder="https://..."></label>' +
     '<div class="riga2">' +
       '<label>Prezzo (€)<input id="' + p + '-prezzo" type="number" inputmode="numeric" min="0" step="1000" value="' + esc(l.prezzo === null || l.prezzo === undefined ? "" : l.prezzo) + '"></label>' +
       '<label>Prossimo contatto<input id="' + p + '-dataProssimoContatto" type="date" value="' + esc(l.dataProssimoContatto) + '"></label>' +
@@ -598,21 +673,59 @@ function leggiCampiNotizia(p) {
   };
 }
 
-// Proposta 3: dalla fase "Contattato" in poi si spunta "Già contattato"
+// ---------------- Eventi di modifica ----------------
 document.addEventListener("change", function (ev) {
   const t = ev.target;
-  if (t && t.id && /-fase$/.test(t.id)) {
+  if (!t) return;
+  // Dalla fase "Contattato" in poi si spunta "Già contattato"
+  if (t.id && /-fase$/.test(t.id)) {
     const p = t.id.split("-")[0];
     if (FASI.indexOf(t.value) >= FASI.indexOf("Contattato") && $(p + "-contattato")) {
       $(p + "-contattato").checked = true;
     }
   }
+  // Spunte del giro quotidiano
+  if (t.dataset && t.dataset.giro) {
+    const g = statoGiro();
+    if (t.checked) g.fatti[t.dataset.giro] = true; else delete g.fatti[t.dataset.giro];
+    scriviLocale("hunterGiro", g);
+    renderGiro();
+  }
 });
+
+// ---------------- Controllo doppioni (proposta 18) ----------------
+// Restituisce true se si può procedere, false se l'utente rinuncia
+async function controllaDoppioni(dati, conferme) {
+  const c = await api("POST", "/controlla", dati);
+  if (c.bloccato) {
+    avviso('Questo contatto è nell\'elenco "Non ricontattare"', true);
+    return false;
+  }
+  if (c.scartato && !conferme.scartato) {
+    const quando = c.scartato.scartatoIl ? " il " + formattaData(c.scartato.scartatoIl) : "";
+    if (!confirm("Avevi già scartato questo link" + quando + ".\nVuoi registrarlo comunque?")) return false;
+    conferme.scartato = true;
+  }
+  const nuovi = (c.duplicati || []).filter(function (d) { return conferme.ids.indexOf(d.id) === -1; });
+  if (nuovi.length) {
+    const d = nuovi[0];
+    const testo = "Possibile doppione (" + d.motivo + "):\n«" + d.nome + "» – " + d.fase +
+      (d.comune ? " – " + d.comune : "") + ", inserita il " + formattaData(d.createdAt) +
+      "\n\nOK = registra comunque\nAnnulla = apri la notizia esistente";
+    if (!confirm(testo)) {
+      if (leads.some(function (x) { return x.id === d.id; })) apriScheda(d.id);
+      return false;
+    }
+    nuovi.forEach(function (x) { conferme.ids.push(x.id); });
+  }
+  return true;
+}
 
 // ---------------- Nuova notizia ----------------
 function costruisciFormNuovo() {
   $("formNuovo").innerHTML = campiNotiziaHTML("n", {}) +
     '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva notizia</button>';
+  confermeNuovo = { ids: [], scartato: false };
 }
 
 $("formNuovo").addEventListener("submit", async function (ev) {
@@ -622,6 +735,10 @@ $("formNuovo").addEventListener("submit", async function (ev) {
   const b = $("btnSalvaNuovo");
   b.disabled = true;
   try {
+    const procedi = await controllaDoppioni({
+      facebookUrl: dati.facebookUrl, linkAnnuncio: dati.linkAnnuncio, nome: dati.nome, comune: dati.comune
+    }, confermeNuovo);
+    if (!procedi) { b.disabled = false; return; }
     const r = await api("POST", "/leads", dati);
     leads.unshift(r.lead);
     renderTutto();
@@ -634,7 +751,7 @@ $("formNuovo").addEventListener("submit", async function (ev) {
   }
 });
 
-// ---------------- Card di una notizia ----------------
+// ---------------- Card ----------------
 function cardNotiziaHTML(l, conFrecce) {
   const oggi = oggiISO();
   const b = [];
@@ -687,6 +804,12 @@ function cardAmmHTML(a) {
 // ---------------- Clic globali ----------------
 document.addEventListener("click", function (ev) {
   const t = ev.target;
+  const traccia = t.closest("[data-traccia]");
+  if (traccia) { registraRicerca(traccia.dataset.traccia, traccia.dataset.canale); return; }
+  const su = t.closest("[data-giro-su]");
+  if (su) { spostaGiro(su.dataset.giroSu, -1); return; }
+  const giu = t.closest("[data-giro-giu]");
+  if (giu) { spostaGiro(giu.dataset.giroGiu, 1); return; }
   const sposta = t.closest("[data-sposta]");
   if (sposta) { ev.preventDefault(); spostaFase(sposta.dataset.sposta, Number(sposta.dataset.delta)); return; }
   const letto = t.closest("[data-radar-letto]");
@@ -769,6 +892,7 @@ function riempiFiltri() {
   $("filtroPriorita").innerHTML = opzioni(PRIORITA, "", "Tutte le priorità");
   $("filtroFonte").innerHTML = opzioni(FONTI, "", "Tutte le fonti");
   $("filtroStatoAmm").innerHTML = opzioni(STATI_AMM, "", "Tutti gli stati");
+  $("fontePost").innerHTML = '<option value="">Automatico (dal link)</option>' + opzioni(FONTI, "");
   ["cerca", "filtroFase", "filtroSegnale", "filtroPriorita", "filtroFonte", "ordina"].forEach(function (id) {
     $(id).addEventListener("input", renderArchivio);
     $(id).addEventListener("change", renderArchivio);
@@ -780,7 +904,9 @@ function riempiFiltri() {
   ["radarComune", "radarStato"].forEach(function (id) {
     $(id).addEventListener("change", renderRadar);
   });
-  $("ricercaZona").addEventListener("change", renderChipsZona);
+  ["ricercaZona", "ricercaParola"].forEach(function (id) {
+    $(id).addEventListener("change", function () { renderCanali(); renderGruppi(); });
+  });
 }
 
 function leadsFiltrati() {
@@ -844,8 +970,8 @@ $("btnExcel").addEventListener("click", function () {
       "No agenzie": l.noAgenzie ? "Sì" : "No",
       "Esito": l.esito || "",
       "Gruppo / ricerca": l.gruppo || "",
-      "Link Facebook": l.facebookUrl || "",
-      "Link annuncio": l.linkAnnuncio || "",
+      "Link social": l.facebookUrl || "",
+      "Link annuncio / web": l.linkAnnuncio || "",
       "Note": l.note || ""
     };
   });
@@ -898,64 +1024,182 @@ async function spostaFase(id, delta) {
   }
 }
 
-// ---------------- Ricerca Facebook ----------------
+// ---------------- Ricerca multi-canale (proposte 15 e 17) ----------------
 function urlGruppo(u) { return String(u || "").split("?")[0].split("#")[0].replace(/\/+$/, ""); }
 
-function renderRicerca() {
-  const parole = impostazioni.paroleChiave;
-  const gruppi = impostazioni.gruppiFacebook;
-  if (!parole.length) {
-    $("ricercaGruppi").innerHTML = '<div class="vuoto">Aggiungi le parole chiave in ⚙️ Impostazioni.</div>';
-  } else if (!gruppi.length) {
-    $("ricercaGruppi").innerHTML = '<div class="vuoto">Aggiungi i tuoi gruppi Facebook in ⚙️ Impostazioni.</div>';
-  } else {
-    $("ricercaGruppi").innerHTML = gruppi.map(function (g) {
-      const base = urlGruppo(g.url);
-      return '<div class="card"><div class="titolo">' + esc(g.nome) + '</div><div class="chips">' +
-        parole.map(function (k) {
-          return '<a class="chip" target="_blank" rel="noopener noreferrer" href="' + esc(base + "/search/?q=" + encodeURIComponent(k)) + '">' + esc(k) + '</a>';
-        }).join("") + '</div></div>';
-    }).join("");
+function zonaScelta() { return $("ricercaZona").value || "Milano"; }
+function parolaScelta() { return $("ricercaParola").value || "vendo casa"; }
+
+function ultimeRicerche() { return leggiLocale("hunterUltime", {}); }
+
+function registraRicerca(chiave, canale) {
+  const u = ultimeRicerche();
+  u[chiave] = new Date().toISOString();
+  scriviLocale("hunterUltime", u);
+  if (canale) {
+    ultimoCanale = canale;
+    const g = statoGiro();
+    g.fatti[canale] = true;
+    scriviLocale("hunterGiro", g);
   }
+  setTimeout(function () { renderCanali(); renderGruppi(); renderGiro(); }, 300);
+}
+
+function renderRicerca() {
   const zone = impostazioni.zonePreferite.length ? impostazioni.zonePreferite : ["Milano"];
-  const attuale = $("ricercaZona").value;
-  $("ricercaZona").innerHTML = opzioni(zone, zone.indexOf(attuale) !== -1 ? attuale : zone[0]);
-  renderChipsZona();
+  const parole = impostazioni.paroleChiave.length ? impostazioni.paroleChiave : ["vendo casa"];
+  const zonaAtt = $("ricercaZona").value;
+  const parolaAtt = $("ricercaParola").value;
+  $("ricercaZona").innerHTML = opzioni(zone, zone.indexOf(zonaAtt) !== -1 ? zonaAtt : zone[0]);
+  $("ricercaParola").innerHTML = opzioni(parole, parole.indexOf(parolaAtt) !== -1 ? parolaAtt : parole[0]);
+  renderGiro();
+  renderCanali();
+  renderGruppi();
 }
 
-function renderChipsZona() {
-  const zona = $("ricercaZona").value || "";
-  const parole = impostazioni.paroleChiave;
-  $("ricercaChipsZona").innerHTML = parole.length ? parole.map(function (k) {
-    const q = k + " " + zona;
-    return '<a class="chip" target="_blank" rel="noopener noreferrer" href="' + esc("https://www.facebook.com/search/posts/?q=" + encodeURIComponent(q)) + '">' + esc(k) + '</a>';
-  }).join("") : '<div class="vuoto">Aggiungi le parole chiave in ⚙️ Impostazioni.</div>';
+function renderCanali() {
+  const z = zonaScelta();
+  const p = parolaScelta();
+  const u = ultimeRicerche();
+  $("ricercaCanali").innerHTML = CANALI.filter(function (c) { return !c.soloGiro; }).map(function (c) {
+    const chiave = c.k + "|" + z + "|" + p;
+    return '<div class="canale">' +
+      '<a class="chip" target="_blank" rel="noopener noreferrer" data-traccia="' + esc(chiave) + '" data-canale="' + esc(c.k) + '" href="' + esc(c.url(p, z)) + '">' + esc(c.nome) + '</a>' +
+      '<span class="ultima">' + esc(formattaUltima(u[chiave])) + '</span></div>';
+  }).join("");
 }
 
-$("btnAnalizza").addEventListener("click", function () {
+function renderGruppi() {
+  const gruppi = impostazioni.gruppiFacebook;
+  const p = parolaScelta();
+  const u = ultimeRicerche();
+  if (!gruppi.length) {
+    $("ricercaGruppi").innerHTML = '<div class="vuoto">Aggiungi i gruppi Facebook (per esempio i "Sei di… se") in ⚙️ Impostazioni.</div>';
+    return;
+  }
+  $("ricercaGruppi").innerHTML = '<div class="canali">' + gruppi.map(function (g) {
+    const base = urlGruppo(g.url);
+    const chiave = "grp:" + base + "|" + p;
+    return '<div class="canale">' +
+      '<a class="chip" target="_blank" rel="noopener noreferrer" data-traccia="' + esc(chiave) + '" data-canale="fb_gruppi" href="' + esc(base + "/search/?q=" + encodeURIComponent(p)) + '">' + esc(g.nome) + '</a>' +
+      '<span class="ultima">' + esc(formattaUltima(u[chiave])) + '</span></div>';
+  }).join("") + '</div>';
+}
+
+// Giro quotidiano
+function statoGiro() {
+  const g = leggiLocale("hunterGiro", null);
+  if (!g || g.data !== oggiISO()) return { data: oggiISO(), fatti: {} };
+  if (!g.fatti) g.fatti = {};
+  return g;
+}
+
+function ordineGiro() {
+  const salvato = leggiLocale("hunterGiroOrdine", []);
+  const tutti = CANALI.map(function (c) { return c.k; });
+  const ordine = salvato.filter(function (k) { return tutti.indexOf(k) !== -1; });
+  tutti.forEach(function (k) { if (ordine.indexOf(k) === -1) ordine.push(k); });
+  return ordine;
+}
+
+function spostaGiro(k, delta) {
+  const ordine = ordineGiro();
+  const i = ordine.indexOf(k);
+  const j = i + delta;
+  if (i < 0 || j < 0 || j >= ordine.length) return;
+  const tmp = ordine[i]; ordine[i] = ordine[j]; ordine[j] = tmp;
+  scriviLocale("hunterGiroOrdine", ordine);
+  renderGiro();
+}
+
+function renderGiro() {
+  const g = statoGiro();
+  const oggi = oggiISO();
+  const registrateOggi = leads.filter(function (l) {
+    if (l.automatica || !l.createdAt) return false;
+    const d = new Date(l.createdAt);
+    return !isNaN(d.getTime()) && dataLocale(d) === oggi;
+  }).length;
+  const ordine = ordineGiro();
+  const fatti = ordine.filter(function (k) { return g.fatti[k]; }).length;
+  $("giro").innerHTML =
+    '<div class="riga-badge" style="margin:0 0 8px">' +
+      '<span class="badge ok">✅ ' + fatti + ' / ' + ordine.length + ' canali visitati oggi</span>' +
+      '<span class="badge punti">📝 ' + contaNotizie(registrateOggi) + ' registrate oggi</span>' +
+    '</div>' +
+    ordine.map(function (k) {
+      const c = CANALI.find(function (x) { return x.k === k; });
+      const fatto = !!g.fatti[k];
+      return '<div class="giro-riga">' +
+        '<input type="checkbox" data-giro="' + esc(k) + '"' + (fatto ? " checked" : "") + '>' +
+        '<span class="nome' + (fatto ? " fatto" : "") + '">' + esc(c.nome) + '</span>' +
+        '<button type="button" data-giro-su="' + esc(k) + '">▲</button>' +
+        '<button type="button" data-giro-giu="' + esc(k) + '">▼</button>' +
+      '</div>';
+    }).join("");
+}
+
+// Incolla e analizza
+$("btnAnalizza").addEventListener("click", async function () {
   const testo = $("testoPost").value.trim();
-  if (!testo) { avviso("Incolla prima il testo del post", true); return; }
-  let segnale = "Altro";
-  for (const r of REGOLE_SEGNALI) { if (r[1].test(testo)) { segnale = r[0]; break; } }
-  if (segnale === "Altro" && /vendo\s+(casa|appartamento|monolocale|bilocale|trilocale|quadrilocale|villa|attico)|vendesi/i.test(testo)) segnale = "Vendita Privato";
-  if (segnale === "Altro" && /affittasi|affitto\s+(il\s+)?mio|locasi/i.test(testo)) segnale = "Affitto da privato";
-  const noAg = REGEX_NO_AGENZIE.test(testo);
-  const comune = trovaComune(testo);
-  const priorita = noAg ? "Bassa" : (["Successione", "Separazione", "Trasferimento"].indexOf(segnale) !== -1 ? "Alta" : "Media");
   const link = conLinkCompleto($("linkPost").value);
+  if (!testo && !link) { avviso("Incolla il testo e/o il link", true); return; }
+  const b = $("btnAnalizza");
+  b.disabled = true;
+  const conferme = { ids: [], scartato: false };
+  try {
+    if (link) {
+      const procedi = await controllaDoppioni({ facebookUrl: link }, conferme);
+      if (!procedi) return;
+    }
+    let segnale = "Altro";
+    for (const r of REGOLE_SEGNALI) { if (r[1].test(testo)) { segnale = r[0]; break; } }
+    if (segnale === "Altro" && REGEX_VENDITA.test(testo)) segnale = "Vendita Privato";
+    if (segnale === "Altro" && /affittasi|affitto\s+(il\s+)?mio|locasi/i.test(testo)) segnale = "Affitto da privato";
+    const noAg = REGEX_NO_AGENZIE.test(testo);
+    const comune = trovaComune(testo);
+    const priorita = noAg ? "Bassa" : (["Successione", "Separazione", "Trasferimento"].indexOf(segnale) !== -1 ? "Alta" : "Media");
+    let fonte = $("fontePost").value || fonteDaLink(link);
+    if (!fonte) {
+      const c = CANALI.find(function (x) { return x.k === ultimoCanale; });
+      fonte = c ? c.fonte : "Facebook";
+    }
 
-  costruisciFormNuovo();
-  $("n-segnale").value = segnale;
-  $("n-comune").value = comune;
-  $("n-priorita").value = priorita;
-  $("n-fonte").value = "Facebook";
-  $("n-noAgenzie").checked = noAg;
-  $("n-note").value = testo.slice(0, 1000);
-  if (link) $("n-facebookUrl").value = link;
-  $("testoPost").value = "";
-  $("linkPost").value = "";
-  mostraSezione("nuovo");
-  avviso("Analisi fatta: " + segnale + (comune ? " · " + comune : "") + ". Scrivi il nome e salva.");
+    costruisciFormNuovo();
+    confermeNuovo = conferme;
+    $("n-segnale").value = segnale;
+    $("n-comune").value = comune;
+    $("n-priorita").value = priorita;
+    $("n-fonte").value = fonte;
+    $("n-noAgenzie").checked = noAg;
+    $("n-note").value = testo.slice(0, 1000);
+    if (link) {
+      if (FONTI_SOCIAL.indexOf(fonteDaLink(link)) !== -1) $("n-facebookUrl").value = link;
+      else $("n-linkAnnuncio").value = link;
+    }
+    $("testoPost").value = "";
+    $("linkPost").value = "";
+    $("fontePost").value = "";
+    mostraSezione("nuovo");
+    avviso("Analisi fatta: " + segnale + (comune ? " · " + comune : "") + " · " + fonte + ". Scrivi il nome e salva.");
+  } catch (e) {
+    gestisciErrore(e);
+  } finally {
+    b.disabled = false;
+  }
+});
+
+$("btnScarta").addEventListener("click", async function () {
+  const link = conLinkCompleto($("linkPost").value);
+  if (!link) { avviso("Per scartare serve il link del post o dell'annuncio", true); return; }
+  try {
+    await api("POST", "/scartati", { link: link });
+    $("testoPost").value = "";
+    $("linkPost").value = "";
+    avviso("🗑 Link scartato: se ricompare, Hunter te lo ricorderà");
+  } catch (e) {
+    gestisciErrore(e);
+  }
 });
 
 // ---------------- Radar di zona ----------------
@@ -1108,8 +1352,8 @@ function apriScheda(id) {
   if (l.prezzoIniziale && l.prezzo && l.prezzo < l.prezzoIniziale) info.push("prezzo iniziale " + esc(euro(l.prezzoIniziale)));
   const fb = linkSicuro(l.facebookUrl);
   const ann = linkSicuro(l.linkAnnuncio);
-  if (fb) info.push('<a href="' + esc(fb) + '" target="_blank" rel="noopener noreferrer">Apri Facebook ↗</a>');
-  if (ann) info.push('<a href="' + esc(ann) + '" target="_blank" rel="noopener noreferrer">Apri annuncio ↗</a>');
+  if (fb) info.push('<a href="' + esc(fb) + '" target="_blank" rel="noopener noreferrer">Apri profilo/post ↗</a>');
+  if (ann) info.push('<a href="' + esc(ann) + '" target="_blank" rel="noopener noreferrer">Apri annuncio/pagina ↗</a>');
   $("schedaInfo").innerHTML = info.join(" · ");
   $("formScheda").innerHTML = campiNotiziaHTML("s", l) +
     '<div class="azioni-scheda">' +
@@ -1203,7 +1447,7 @@ $("formScheda").addEventListener("click", async function (ev) {
   if (t.closest("#btnBloccaScheda")) {
     const l = leads.find(function (x) { return x.id === schedaId; });
     if (!l) return;
-    if (!confirm("NON RICONTATTARE\n\nLa notizia \"" + l.nome + "\" verrà eliminata e i suoi link (profilo Facebook / annuncio) verranno bloccati: se ricompariranno, Hunter li scarterà.\n\nProcedere?")) return;
+    if (!confirm("NON RICONTATTARE\n\nLa notizia \"" + l.nome + "\" verrà eliminata e i suoi link (profilo / annuncio) verranno bloccati: se ricompariranno, Hunter li scarterà.\n\nProcedere?")) return;
     try {
       const r = await api("POST", "/leads/" + encodeURIComponent(l.id) + "/blocca");
       leads = leads.filter(function (x) { return x.id !== l.id; });
