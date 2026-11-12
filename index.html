@@ -53,7 +53,7 @@ nav button{flex:1;border:none;background:none;padding:8px 2px 10px;font-size:12p
 nav button .ico{font-size:20px;line-height:1;}
 nav button.attivo{color:var(--blu);font-weight:700;}
 
-/* ---------- Schede lead ---------- */
+/* ---------- Schede notizia ---------- */
 .card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-wrap:anywhere;}
 .card.cliccabile{cursor:pointer;}
 .card .titolo{font-weight:700;font-size:16px;}
@@ -82,7 +82,7 @@ nav button.attivo{color:var(--blu);font-weight:700;}
 .filtri .intero{grid-column:1 / -1;}
 .barra-azioni{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--grigio);}
 
-/* ---------- Pipeline ---------- */
+/* ---------- Trattative ---------- */
 details.colonna{background:var(--card);border-radius:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
 details.colonna summary{padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;}
 details.colonna summary::-webkit-details-marker{display:none;}
@@ -126,7 +126,7 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v0.8</small></h1>
+    <h1>Hunter <small>v0.9</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -135,12 +135,12 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
     <section id="sez-dashboard"></section>
 
     <section id="sez-nuovo" hidden>
-      <h2>Nuovo Lead</h2>
+      <h2>Nuova Notizia</h2>
       <form id="formNuovo" class="card" autocomplete="off"></form>
     </section>
 
     <section id="sez-archivio" hidden>
-      <h2>Archivio Lead</h2>
+      <h2>Archivio Notizie</h2>
       <div class="filtri">
         <input class="intero" type="search" id="cerca" placeholder="Cerca nome, comune, gruppo, note…">
         <select id="filtroFase"></select>
@@ -155,24 +155,24 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
     </section>
 
     <section id="sez-pipeline" hidden>
-      <h2>Pipeline commerciale</h2>
+      <h2>Trattative</h2>
       <div id="listaPipeline"></div>
     </section>
   </main>
 
   <nav>
     <button type="button" data-sezione="dashboard" class="attivo"><span class="ico">📊</span>Dashboard</button>
-    <button type="button" data-sezione="nuovo"><span class="ico">➕</span>Nuovo</button>
+    <button type="button" data-sezione="nuovo"><span class="ico">➕</span>Nuova</button>
     <button type="button" data-sezione="archivio"><span class="ico">🗂️</span>Archivio</button>
-    <button type="button" data-sezione="pipeline"><span class="ico">➡️</span>Pipeline</button>
+    <button type="button" data-sezione="pipeline"><span class="ico">➡️</span>Trattative</button>
   </nav>
 </div>
 
-<!-- ================= SCHEDA LEAD ================= -->
+<!-- ================= SCHEDA NOTIZIA ================= -->
 <div id="modale" hidden>
   <div class="foglio">
     <div class="foglio-testa">
-      <h2 id="schedaTitolo">Scheda lead</h2>
+      <h2 id="schedaTitolo">Scheda notizia</h2>
       <button type="button" class="btn secondario piccolo" id="btnChiudiScheda">✕ Chiudi</button>
     </div>
     <div class="info" id="schedaInfo"></div>
@@ -185,11 +185,11 @@ details.colonna .card{background:#f8fafc;box-shadow:none;border:1px solid var(--
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 0.8
+// HUNTER - app web - versione 0.9 (terminologia: Notizie, Trattative)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Altro"];
-const FASI = ["Nuovo Lead", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
+const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
 const CHIAVE_MEMORIA = "hunterKey";
 
@@ -215,6 +215,8 @@ function formattaData(iso) {
   if (isNaN(d.getTime())) return "";
   return d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
+
+function contaNotizie(n) { return n === 1 ? "1 notizia" : n + " notizie"; }
 
 function avviso(msg, errore) {
   const a = $("avviso");
@@ -353,7 +355,7 @@ function mostraSezione(nome) {
   window.scrollTo(0, 0);
 }
 
-// ---------------- Modulo lead (nuovo e scheda) ----------------
+// ---------------- Modulo notizia (nuova e scheda) ----------------
 function campiLeadHTML(p, l) {
   l = l || {};
   return '' +
@@ -361,7 +363,7 @@ function campiLeadHTML(p, l) {
     '<label>Comune<input id="' + p + '-comune" maxlength="100" value="' + esc(l.comune) + '" placeholder="es. Sesto San Giovanni"></label>' +
     '<label>Segnale<select id="' + p + '-segnale">' + opzioni(SEGNALI, l.segnale || "", "— scegli —") + '</select></label>' +
     '<label>Priorità<select id="' + p + '-priorita">' + opzioni(PRIORITA, l.priorita || "Media") + '</select></label>' +
-    '<label>Fase<select id="' + p + '-fase">' + opzioni(FASI, l.fase || "Nuovo Lead") + '</select></label>' +
+    '<label>Fase<select id="' + p + '-fase">' + opzioni(FASI, l.fase || "Nuova Notizia") + '</select></label>' +
     '<label>Gruppo Facebook / fonte<input id="' + p + '-gruppo" maxlength="200" value="' + esc(l.gruppo) + '"></label>' +
     '<label>Link profilo Facebook<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://facebook.com/..."></label>' +
     '<label class="check"><input type="checkbox" id="' + p + '-contattato"' + (l.contattato ? " checked" : "") + '> Già contattato</label>' +
@@ -386,10 +388,10 @@ function leggiCampi(p) {
   };
 }
 
-// ---------------- Nuovo lead ----------------
+// ---------------- Nuova notizia ----------------
 function costruisciFormNuovo() {
   $("formNuovo").innerHTML = campiLeadHTML("n", {}) +
-    '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva lead</button>';
+    '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva notizia</button>';
 }
 
 $("formNuovo").addEventListener("submit", async function (ev) {
@@ -404,14 +406,14 @@ $("formNuovo").addEventListener("submit", async function (ev) {
     renderTutto();
     costruisciFormNuovo();
     window.scrollTo(0, 0);
-    avviso("✅ Lead salvato: " + r.lead.nome);
+    avviso("✅ Notizia salvata: " + r.lead.nome);
   } catch (e) {
     gestisciErrore(e);
     b.disabled = false;
   }
 });
 
-// ---------------- Card di un lead ----------------
+// ---------------- Card di una notizia ----------------
 function cardLeadHTML(l, conFrecce) {
   let h = '<div class="card cliccabile" data-apri="' + esc(l.id) + '">' +
     '<div class="titolo">' + esc(l.nome || "(senza nome)") + '</div>' +
@@ -467,17 +469,17 @@ function renderDashboard() {
   $("sez-dashboard").innerHTML =
     '<h2>Dashboard</h2>' +
     '<div class="griglia">' +
-      '<div class="numero"><div class="val">' + totale + '</div><div class="lab">Lead totali</div></div>' +
+      '<div class="numero"><div class="val">' + totale + '</div><div class="lab">Notizie totali</div></div>' +
       '<div class="numero"><div class="val">' + daContattare + '</div><div class="lab">Da contattare</div></div>' +
       '<div class="numero"><div class="val">' + incarichi + '</div><div class="lab">Incarichi</div></div>' +
       '<div class="numero"><div class="val">' + venduti + '</div><div class="lab">Venduti</div></div>' +
     '</div>' +
     '<h3>🔥 Priorità alta da contattare (' + urgenti.length + ')</h3>' +
-    (urgenti.length ? urgenti.map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Nessuno al momento.</div>') +
-    '<h3>Lead per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
-    '<h3>Lead per segnale</h3><div class="card">' + barreHTML(SEGNALI, "segnale") + '</div>' +
-    '<h3>Ultimi inseriti</h3>' +
-    (leads.length ? leads.slice(0, 5).map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Ancora nessun lead.</div>');
+    (urgenti.length ? urgenti.map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Nessuna al momento.</div>') +
+    '<h3>Notizie per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
+    '<h3>Notizie per segnale</h3><div class="card">' + barreHTML(SEGNALI, "segnale") + '</div>' +
+    '<h3>Ultime inserite</h3>' +
+    (leads.length ? leads.slice(0, 5).map(function (l) { return cardLeadHTML(l, false); }).join("") : '<div class="vuoto">Ancora nessuna notizia.</div>');
 }
 
 // ---------------- Archivio ----------------
@@ -510,16 +512,16 @@ function leadsFiltrati() {
 
 function renderArchivio() {
   const lista = leadsFiltrati();
-  $("contaArchivio").textContent = lista.length + " lead" + (lista.length !== leads.length ? " su " + leads.length : "");
+  $("contaArchivio").textContent = contaNotizie(lista.length) + (lista.length !== leads.length ? " su " + leads.length : "");
   $("listaArchivio").innerHTML = lista.length
     ? lista.map(function (l) { return cardLeadHTML(l, false); }).join("")
-    : '<div class="vuoto">Nessun lead trovato.</div>';
+    : '<div class="vuoto">Nessuna notizia trovata.</div>';
 }
 
 $("btnExcel").addEventListener("click", function () {
   const lista = leadsFiltrati();
   if (typeof XLSX === "undefined") { avviso("Funzione Excel non disponibile: ricarica la pagina", true); return; }
-  if (!lista.length) { avviso("Nessun lead da esportare", true); return; }
+  if (!lista.length) { avviso("Nessuna notizia da esportare", true); return; }
   const righe = lista.map(function (l) {
     return {
       "Data inserimento": formattaData(l.createdAt),
@@ -537,11 +539,11 @@ $("btnExcel").addEventListener("click", function () {
   });
   const foglio = XLSX.utils.json_to_sheet(righe);
   const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, foglio, "Lead");
-  XLSX.writeFile(libro, "hunter-lead-" + new Date().toISOString().slice(0, 10) + ".xlsx");
+  XLSX.utils.book_append_sheet(libro, foglio, "Notizie");
+  XLSX.writeFile(libro, "hunter-notizie-" + new Date().toISOString().slice(0, 10) + ".xlsx");
 });
 
-// ---------------- Pipeline ----------------
+// ---------------- Trattative ----------------
 function renderPipeline() {
   $("listaPipeline").innerHTML = FASI.map(function (f) {
     const lista = leads.filter(function (l) { return l.fase === f; });
@@ -549,7 +551,7 @@ function renderPipeline() {
     return '<details class="colonna" data-fase="' + esc(f) + '"' + (aperta ? " open" : "") + '>' +
       '<summary><span>' + esc(f) + '</span><span class="badge">' + lista.length + '</span></summary>' +
       '<div class="contenuto">' +
-        (lista.length ? lista.map(function (l) { return cardLeadHTML(l, true); }).join("") : '<div class="vuoto">Nessun lead in questa fase.</div>') +
+        (lista.length ? lista.map(function (l) { return cardLeadHTML(l, true); }).join("") : '<div class="vuoto">Nessuna notizia in questa fase.</div>') +
       '</div></details>';
   }).join("");
   $("listaPipeline").querySelectorAll("details").forEach(function (d) {
@@ -579,14 +581,14 @@ async function spostaFase(id, delta) {
   }
 }
 
-// ---------------- Scheda lead ----------------
+// ---------------- Scheda notizia ----------------
 function apriScheda(id) {
   const l = leads.find(function (x) { return x.id === id; });
   if (!l) return;
   schedaId = id;
-  $("schedaTitolo").textContent = l.nome || "Scheda lead";
+  $("schedaTitolo").textContent = l.nome || "Scheda notizia";
   const link = linkSicuro(l.facebookUrl);
-  $("schedaInfo").innerHTML = "Inserito il " + esc(formattaData(l.createdAt)) +
+  $("schedaInfo").innerHTML = "Inserita il " + esc(formattaData(l.createdAt)) +
     (link ? ' · <a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">Apri profilo Facebook ↗</a>' : "");
   $("formScheda").innerHTML = campiLeadHTML("s", l) +
     '<div class="azioni-scheda">' +
@@ -630,13 +632,13 @@ $("formScheda").addEventListener("click", async function (ev) {
   if (!ev.target.closest("#btnEliminaScheda")) return;
   const l = leads.find(function (x) { return x.id === schedaId; });
   if (!l) return;
-  if (!confirm('Eliminare definitivamente il lead "' + l.nome + '"?\nL\'operazione non si può annullare.')) return;
+  if (!confirm('Eliminare definitivamente la notizia "' + l.nome + '"?\nL\'operazione non si può annullare.')) return;
   try {
     await api("DELETE", "/leads/" + encodeURIComponent(l.id));
     leads = leads.filter(function (x) { return x.id !== l.id; });
     chiudiScheda();
     renderTutto();
-    avviso("Lead eliminato");
+    avviso("Notizia eliminata");
   } catch (e) {
     gestisciErrore(e);
   }
