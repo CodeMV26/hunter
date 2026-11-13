@@ -164,7 +164,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.5</small></h1>
+    <h1>Hunter <small>v1.6</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -324,10 +324,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.5 (pulsante "Invia su WhatsApp")
+// HUNTER - app web - versione 1.6 (testo del post sempre completo, telefono e prezzo riconosciuti)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.5";
+const VERSIONE_APP = "1.6";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -668,14 +668,16 @@ function campiNotiziaHTML(p, l) {
     '<label>Gruppo / ricerca / dettaglio fonte<input id="' + p + '-gruppo" maxlength="200" value="' + esc(l.gruppo) + '"></label>' +
     '<label>Link profilo o post (Facebook, Instagram, LinkedIn)<input id="' + p + '-facebookUrl" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.facebookUrl) + '" placeholder="https://..."></label>' +
     '<label>Link annuncio o pagina web<input id="' + p + '-linkAnnuncio" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.linkAnnuncio) + '" placeholder="https://..."></label>' +
+    '<label>Telefono / contatto<input id="' + p + '-telefono" type="tel" autocapitalize="off" value="' + esc(l.telefono) + '" placeholder="es. 333 1234567"></label>' +
     '<div class="riga2">' +
       '<label>Prezzo (€)<input id="' + p + '-prezzo" type="number" inputmode="numeric" min="0" step="1000" value="' + esc(l.prezzo === null || l.prezzo === undefined ? "" : l.prezzo) + '"></label>' +
       '<label>Prossimo contatto<input id="' + p + '-dataProssimoContatto" type="date" value="' + esc(l.dataProssimoContatto) + '"></label>' +
     '</div>' +
     '<label class="check"><input type="checkbox" id="' + p + '-contattato"' + (l.contattato ? " checked" : "") + '> Già contattato</label>' +
     '<label class="check"><input type="checkbox" id="' + p + '-noAgenzie"' + (l.noAgenzie ? " checked" : "") + '> Annuncio con «no agenzie»</label>' +
-    '<label>Esito ultimo contatto<input id="' + p + '-esito" maxlength="1000" value="' + esc(l.esito) + '"></label>' +
-    '<label>Note<textarea id="' + p + '-note" maxlength="5000">' + esc(l.note) + '</textarea></label>';
+    '<label>Esito ultimo contatto<textarea id="' + p + '-esito" rows="2">' + esc(l.esito) + '</textarea></label>' +
+    '<label>Note<textarea id="' + p + '-note">' + esc(l.note) + '</textarea></label>' +
+    '<label>Testo originale del post / annuncio (completo)<textarea id="' + p + '-testoOriginale" rows="6">' + esc(l.testoOriginale) + '</textarea></label>';
 }
 
 function leggiCampiNotizia(p) {
@@ -696,8 +698,66 @@ function leggiCampiNotizia(p) {
     contattato: $(p + "-contattato").checked,
     noAgenzie: $(p + "-noAgenzie").checked,
     esito: $(p + "-esito").value.trim(),
-    note: $(p + "-note").value.trim()
+    note: $(p + "-note").value.trim(),
+    telefono: $(p + "-telefono").value.trim(),
+    testoOriginale: $(p + "-testoOriginale").value.trim()
   };
+}
+
+// Proposta 29: nessun testo viene mai tagliato in silenzio.
+// Se un campo supera il limite, il salvataggio si ferma e lo dice.
+const LIMITI_NOTIZIA = { nome: 200, comune: 100, gruppo: 200, esito: 1000, note: 5000, telefono: 200, testoOriginale: 20000 };
+const ETICHETTE_LIMITI = { nome: "Nome", comune: "Comune", gruppo: "Gruppo", esito: "Esito", note: "Note", telefono: "Telefono", testoOriginale: "Testo originale" };
+function controllaLunghezze(dati) {
+  for (const k in LIMITI_NOTIZIA) {
+    const v = dati[k] || "";
+    if (v.length > LIMITI_NOTIZIA[k]) {
+      return "Il campo «" + ETICHETTE_LIMITI[k] + "» è troppo lungo (" + v.length + " caratteri, massimo " +
+        LIMITI_NOTIZIA[k] + "). Accorcialo: nulla è stato salvato e nulla è stato tagliato.";
+    }
+  }
+  return "";
+}
+
+// Proposta 29: riconoscimento di telefoni e prezzo nel testo di un post
+function estraiTelefoni(testo) {
+  // il prefisso internazionale (+39 / 0039) viene tolto prima di cercare
+  const t = String(testo || "").replace(/(?:\+|\b00)\s?39[\s.\-\/]*/g, " ");
+  const trovati = [];
+  const re = /\(?\b(3\d{2}|0\d{1,3})\)?((?:[\s.\-\/]*\d){5,8})/g;
+  let m;
+  while ((m = re.exec(t)) !== null) {
+    const prima = t.charAt(m.index - 1);
+    if (/[\d€]/.test(prima)) continue;
+    const dopo = t.slice(re.lastIndex, re.lastIndex + 6);
+    if (/^\s*(€|euro|eur\b|mila|k\b|mq|m2|m²|metri)/i.test(dopo)) continue;
+    const cifre = (m[1] + m[2]).replace(/\D/g, "");
+    const cellulare = cifre.charAt(0) === "3";
+    if (cellulare && (cifre.length < 9 || cifre.length > 10)) continue;
+    if (!cellulare && (cifre.length < 6 || cifre.length > 11)) continue;
+    const bello = cellulare ? cifre.slice(0, 3) + " " + cifre.slice(3) : cifre;
+    if (trovati.indexOf(bello) === -1) trovati.push(bello);
+  }
+  return trovati.join(", ");
+}
+
+function estraiPrezzoPost(testo) {
+  const t = String(testo || "")
+    .replace(/[\d.,]+\s?(€|euro)\s?\/\s?(mq|m2|m²|mese|metro)/gi, " ")
+    .replace(/(spese|condominio|condominiali|cauzione|deposito)[^\d€]{0,25}[\d.,]+\s?(€|euro)?/gi, " ");
+  const valori = [];
+  const re = /(?:€\s?(\d{1,3}(?:[.\s]\d{3})+|\d+(?:,\d+)?))|(\d{1,3}(?:[.\s]\d{3})+|\d+(?:,\d+)?)\s?(€|euro|eur\b|mila|k\b)/gi;
+  let m;
+  while ((m = re.exec(t)) !== null) {
+    const grezzo = (m[1] || m[2] || "").replace(/[.\s]/g, "").replace(",", ".");
+    let n = Number(grezzo);
+    if (!isFinite(n)) continue;
+    const unita = (m[3] || "").toLowerCase();
+    if (unita === "mila" || unita === "k") n = n * 1000;
+    n = Math.round(n);
+    if (n >= 100 && n <= 50000000) valori.push(n);
+  }
+  return valori.length ? Math.max.apply(null, valori) : null;
 }
 
 // ---------------- Eventi di modifica ----------------
@@ -756,6 +816,8 @@ $("formNuovo").addEventListener("submit", async function (ev) {
   ev.preventDefault();
   const dati = leggiCampiNotizia("n");
   if (!dati.nome) { avviso("Il nome è obbligatorio", true); return; }
+  const troppoLungo = controllaLunghezze(dati);
+  if (troppoLungo) { avviso(troppoLungo, true); return; }
   const b = $("btnSalvaNuovo");
   b.disabled = true;
   try {
@@ -948,7 +1010,7 @@ function leadsFiltrati() {
     if (fo && (l.fonte || "Altro") !== fo) return false;
     if (q) {
       if (mNum) return Number(l.numero) === Number(mNum[1]);
-      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito, l.titoloAnnuncio, l.portale].join(" ").toLowerCase();
+      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito, l.titoloAnnuncio, l.portale, l.telefono, l.testoOriginale].join(" ").toLowerCase();
       if (testo.indexOf(q) === -1) return false;
     }
     return true;
@@ -999,7 +1061,9 @@ $("btnExcel").addEventListener("click", function () {
       "Gruppo / ricerca": l.gruppo || "",
       "Link social": l.facebookUrl || "",
       "Link annuncio / web": l.linkAnnuncio || "",
-      "Note": l.note || ""
+      "Telefono": l.telefono || "",
+      "Note": l.note || "",
+      "Testo originale": l.testoOriginale || ""
     };
   });
   const foglio = XLSX.utils.json_to_sheet(righe);
@@ -1197,7 +1261,12 @@ $("btnAnalizza").addEventListener("click", async function () {
     $("n-priorita").value = priorita;
     $("n-fonte").value = fonte;
     $("n-noAgenzie").checked = noAg;
-    $("n-note").value = testo.slice(0, 1000);
+    // Proposta 29: il testo resta COMPLETO; telefono e prezzo vengono riconosciuti
+    $("n-testoOriginale").value = testo;
+    const telefoni = estraiTelefoni(testo);
+    const prezzoPost = estraiPrezzoPost(testo);
+    if (telefoni) $("n-telefono").value = telefoni;
+    if (prezzoPost) $("n-prezzo").value = prezzoPost;
     if (link) {
       if (FONTI_SOCIAL.indexOf(fonteDaLink(link)) !== -1) $("n-facebookUrl").value = link;
       else $("n-linkAnnuncio").value = link;
@@ -1206,7 +1275,12 @@ $("btnAnalizza").addEventListener("click", async function () {
     $("linkPost").value = "";
     $("fontePost").value = "";
     mostraSezione("nuovo");
-    avviso("Analisi fatta: " + segnale + (comune ? " · " + comune : "") + " · " + fonte + ". Scrivi il nome e salva.");
+    avviso("Analisi fatta: " + segnale + (comune ? " · " + comune : "") + " · " + fonte +
+      " · 📞 " + (telefoni || "telefono non trovato") + " · 💶 " + (prezzoPost ? euro(prezzoPost) : "prezzo non trovato") +
+      ". Testo completo salvato (" + testo.length + " caratteri). Controlla, scrivi il nome e salva.");
+    if (testo.length > LIMITI_NOTIZIA.testoOriginale) {
+      avviso("⚠️ Il testo è lunghissimo (" + testo.length + " caratteri, massimo " + LIMITI_NOTIZIA.testoOriginale + "): accorcialo prima di salvare.", true);
+    }
   } catch (e) {
     gestisciErrore(e);
   } finally {
@@ -1379,6 +1453,9 @@ function apriScheda(id) {
   const ann = linkSicuro(l.linkAnnuncio);
   if (fb) info.push('<a href="' + esc(fb) + '" target="_blank" rel="noopener noreferrer">Apri profilo/post ↗</a>');
   if (ann) info.push('<a href="' + esc(ann) + '" target="_blank" rel="noopener noreferrer">Apri annuncio/pagina ↗</a>');
+  String(l.telefono || "").split(",").map(function (x) { return x.trim(); }).filter(Boolean).forEach(function (tel) {
+    info.push('<a href="tel:' + esc(tel.replace(/[^\d+]/g, "")) + '">📞 Chiama ' + esc(tel) + '</a>');
+  });
   $("schedaInfo").innerHTML = info.join(" · ");
   $("formScheda").innerHTML = campiNotiziaHTML("s", l) +
     '<div class="azioni-scheda">' +
@@ -1414,6 +1491,8 @@ $("formScheda").addEventListener("submit", async function (ev) {
     if (schedaTipo === "notizia") {
       const dati = leggiCampiNotizia("s");
       if (!dati.nome) throw new Error("Il nome è obbligatorio");
+      const troppoLungo = controllaLunghezze(dati);
+      if (troppoLungo) throw new Error(troppoLungo);
       const r = await api("PATCH", "/leads/" + encodeURIComponent(schedaId), dati);
       const i = leads.findIndex(function (x) { return x.id === schedaId; });
       if (i >= 0) leads[i] = r.lead;
@@ -1455,6 +1534,7 @@ function testoWhatsApp(l) {
     if (l.prezzoIniziale && l.prezzoIniziale > l.prezzo) p += " (prima " + euro(l.prezzoIniziale) + ")";
     righe.push(p);
   }
+  if (l.telefono) righe.push("📞 Telefono: " + l.telefono);
   if (l.priorita) righe.push("Priorità: " + l.priorita + (l.contattato ? " · già contattato" : ""));
   if (l.dataProssimoContatto) righe.push("Prossimo contatto: " + formattaData(l.dataProssimoContatto));
   const ann = linkSicuro(l.linkAnnuncio);
@@ -1462,9 +1542,17 @@ function testoWhatsApp(l) {
   const fb = linkSicuro(l.facebookUrl);
   if (fb) righe.push("Profilo/post: " + fb);
   if (l.esito) righe.push("", "*Esito:* " + String(l.esito).slice(0, 800));
-  if (l.note) righe.push("", "*Note:* " + String(l.note).slice(0, 1500));
+  if (l.note) righe.push("", "*Note:* " + accorciaDichiarato(l.note, 1200, l));
+  if (l.testoOriginale) righe.push("", "*Testo del post:* " + accorciaDichiarato(l.testoOriginale, 1500, l));
   righe.push("", "🔒 _Riservato alla squadra Hunter: non inoltrare a estranei._");
   return righe.join("\n");
+}
+
+// Se un testo è troppo lungo per WhatsApp lo dice chiaramente (il testo intero resta in Hunter)
+function accorciaDichiarato(testo, max, l) {
+  const t = String(testo);
+  if (t.length <= max) return t;
+  return t.slice(0, max) + "… [continua in Hunter, " + (numeroNotizia(l) || "notizia") + "]";
 }
 
 function inviaWhatsApp(l) {
