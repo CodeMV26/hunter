@@ -162,7 +162,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.3</small></h1>
+    <h1>Hunter <small>v1.4</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -267,6 +267,15 @@ details.colonna .card{background:var(--card2);}
 
     <section id="sez-impostazioni" hidden>
       <h2>⚙️ Impostazioni</h2>
+      <h3>🤖 Fonti automatiche</h3>
+      <div class="card">
+        <label class="check"><input type="checkbox" class="fonte-auto" data-fonte="subito"> Subito</label>
+        <label class="check"><input type="checkbox" class="fonte-auto" data-fonte="idealista"> Idealista</label>
+        <label class="check"><input type="checkbox" class="fonte-auto" data-fonte="immobiliare"> Immobiliare.it</label>
+        <label class="check"><input type="checkbox" class="fonte-auto" data-fonte="googleAlerts"> Google Alerts</label>
+        <div class="testo-aiuto">Spunta = la fonte crea notizie in automatico. Senza spunta, le email di quella fonte vengono lette ma ignorate. La modifica si salva subito, al tocco.</div>
+      </div>
+      <h3>Zone, parole chiave, gruppi</h3>
       <div class="card">
         <label>Zone preferite (un comune per riga)<textarea id="impZone" placeholder="Milano&#10;Sesto San Giovanni&#10;Cinisello Balsamo"></textarea></label>
         <div class="testo-aiuto">Le notizie in queste zone ricevono +10 punti. Servono anche al riconoscimento automatico del comune e al menu Zona della Ricerca.</div>
@@ -313,10 +322,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.3 (numero progressivo delle notizie)
+// HUNTER - app web - versione 1.4 (interruttori "Fonti automatiche")
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.3";
+const VERSIONE_APP = "1.4";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -367,7 +376,8 @@ let password = "";
 let leads = [];
 let amministratori = [];
 let radar = [];
-let impostazioni = { zonePreferite: [], paroleChiave: [], gruppiFacebook: [] };
+const FONTI_DEFAULT = { subito: true, idealista: true, immobiliare: true, googleAlerts: true };
+let impostazioni = { fontiAttive: Object.assign({}, FONTI_DEFAULT), zonePreferite: [], paroleChiave: [], gruppiFacebook: [] };
 let versioneWorker = "";
 let schedaTipo = null;
 let schedaId = null;
@@ -576,6 +586,7 @@ async function caricaTutto() {
     amministratori = r[1].amministratori || [];
     radar = r[2].radar || [];
     impostazioni = {
+      fontiAttive: Object.assign({}, FONTI_DEFAULT, r[3].fontiAttive || {}),
       zonePreferite: r[3].zonePreferite || [],
       paroleChiave: r[3].paroleChiave || [],
       gruppiFacebook: r[3].gruppiFacebook || []
@@ -1472,6 +1483,9 @@ $("formScheda").addEventListener("click", async function (ev) {
 
 // ---------------- Impostazioni ----------------
 function riempiImpostazioni() {
+  document.querySelectorAll(".fonte-auto").forEach(function (c) {
+    c.checked = impostazioni.fontiAttive[c.dataset.fonte] !== false;
+  });
   $("impZone").value = impostazioni.zonePreferite.join("\n");
   $("impParole").value = impostazioni.paroleChiave.join("\n");
   $("impGruppi").value = impostazioni.gruppiFacebook.map(function (g) { return g.nome + " | " + g.url; }).join("\n");
@@ -1480,6 +1494,31 @@ function riempiImpostazioni() {
 function righe(testo) {
   return String(testo || "").split("\n").map(function (r) { return r.trim(); }).filter(Boolean);
 }
+
+// Proposta 25: interruttori delle fonti automatiche, salvati al tocco
+document.querySelectorAll(".fonte-auto").forEach(function (c) {
+  c.addEventListener("change", async function () {
+    const nuove = Object.assign({}, impostazioni.fontiAttive);
+    nuove[c.dataset.fonte] = c.checked;
+    const nome = c.parentNode.textContent.trim();
+    document.querySelectorAll(".fonte-auto").forEach(function (x) { x.disabled = true; });
+    try {
+      const r = await api("PUT", "/impostazioni", {
+        zonePreferite: impostazioni.zonePreferite,
+        paroleChiave: impostazioni.paroleChiave,
+        gruppiFacebook: impostazioni.gruppiFacebook,
+        fontiAttive: nuove
+      });
+      impostazioni.fontiAttive = Object.assign({}, FONTI_DEFAULT, (r.impostazioni && r.impostazioni.fontiAttive) || nuove);
+      avviso(c.checked ? "🟢 " + nome + " attivata" : "⚪ " + nome + " disattivata: le sue email saranno ignorate");
+    } catch (e) {
+      c.checked = !c.checked;
+      gestisciErrore(e);
+    } finally {
+      document.querySelectorAll(".fonte-auto").forEach(function (x) { x.disabled = false; });
+    }
+  });
+});
 
 $("btnSalvaImp").addEventListener("click", async function () {
   const gruppi = [];
@@ -1498,6 +1537,7 @@ $("btnSalvaImp").addEventListener("click", async function () {
   try {
     const r = await api("PUT", "/impostazioni", dati);
     impostazioni = r.impostazioni;
+    impostazioni.fontiAttive = Object.assign({}, FONTI_DEFAULT, impostazioni.fontiAttive || {});
     riempiImpostazioni();
     aggiornaDatalistComuni();
     await caricaTutto();
