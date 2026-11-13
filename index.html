@@ -36,6 +36,8 @@ label.check input{width:22px;height:22px;margin:0;flex-shrink:0;accent-color:var
 .btn.secondario{background:#2a2f3a;color:var(--testo2);}
 .btn.pericolo{background:#b91c1c;color:#fff;}
 .btn.scuro{background:#7c2d12;color:#fff;}
+.btn.whatsapp{background:#15803d;color:#fff;}
+.azioni-scheda .btn.whatsapp{flex:1 1 100%;}
 .btn.piccolo{padding:7px 10px;font-size:14px;border-radius:8px;}
 .btn.largo{width:100%;}
 .btn:disabled{opacity:.45;}
@@ -162,7 +164,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.4</small></h1>
+    <h1>Hunter <small>v1.5</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -322,10 +324,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.4 (interruttori "Fonti automatiche")
+// HUNTER - app web - versione 1.5 (pulsante "Invia su WhatsApp")
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.4";
+const VERSIONE_APP = "1.5";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -1380,6 +1382,7 @@ function apriScheda(id) {
   $("schedaInfo").innerHTML = info.join(" · ");
   $("formScheda").innerHTML = campiNotiziaHTML("s", l) +
     '<div class="azioni-scheda">' +
+      '<button type="button" class="btn whatsapp" id="btnWhatsApp">🟢 Invia su WhatsApp</button>' +
       '<button type="submit" class="btn" id="btnSalvaScheda">💾 Salva</button>' +
       '<button type="button" class="btn pericolo" id="btnEliminaScheda">🗑 Elimina</button>' +
       '<button type="button" class="btn scuro" id="btnBloccaScheda">🚫 Non ricontattare</button>' +
@@ -1438,8 +1441,53 @@ $("formScheda").addEventListener("submit", async function (ev) {
   }
 });
 
+// Proposta 28: testo del messaggio WhatsApp per i membri della squadra (dati operativi completi)
+function testoWhatsApp(l) {
+  const righe = [numeroNotizia(l) ? "🏠 *Hunter – notizia " + numeroNotizia(l) + "*" : "🏠 *Hunter – notizia*"];
+  if (l.nome) righe.push(l.nome);
+  if (l.comune) righe.push("Comune: " + l.comune);
+  const sf = [];
+  if (l.segnale) sf.push("Segnale: " + l.segnale);
+  if (l.fase) sf.push("Fase: " + l.fase);
+  if (sf.length) righe.push(sf.join(" · "));
+  if (l.prezzo) {
+    let p = "Prezzo: " + euro(l.prezzo);
+    if (l.prezzoIniziale && l.prezzoIniziale > l.prezzo) p += " (prima " + euro(l.prezzoIniziale) + ")";
+    righe.push(p);
+  }
+  if (l.priorita) righe.push("Priorità: " + l.priorita + (l.contattato ? " · già contattato" : ""));
+  if (l.dataProssimoContatto) righe.push("Prossimo contatto: " + formattaData(l.dataProssimoContatto));
+  const ann = linkSicuro(l.linkAnnuncio);
+  if (ann) righe.push("Annuncio: " + ann);
+  const fb = linkSicuro(l.facebookUrl);
+  if (fb) righe.push("Profilo/post: " + fb);
+  if (l.esito) righe.push("", "*Esito:* " + String(l.esito).slice(0, 800));
+  if (l.note) righe.push("", "*Note:* " + String(l.note).slice(0, 1500));
+  righe.push("", "🔒 _Riservato alla squadra Hunter: non inoltrare a estranei._");
+  return righe.join("\n");
+}
+
+function inviaWhatsApp(l) {
+  const ok = confirm(
+    "⚠️ INFORMAZIONI RISERVATE\n\n" +
+    "Il messaggio contiene dati personali, note ed esito dei contatti.\n" +
+    "Invialo SOLO a chi fa parte della tua squadra.\n" +
+    "Non comunicarlo né inoltrarlo a estranei.\n\n" +
+    "Continuare?"
+  );
+  if (!ok) return;
+  const url = "https://wa.me/?text=" + encodeURIComponent(testoWhatsApp(l));
+  const finestra = window.open(url, "_blank");
+  if (!finestra) location.href = url;
+}
+
 $("formScheda").addEventListener("click", async function (ev) {
   const t = ev.target;
+  if (t.closest("#btnWhatsApp")) {
+    const l = leads.find(function (x) { return x.id === schedaId; });
+    if (l) inviaWhatsApp(l);
+    return;
+  }
   if (t.closest("#btnContattatoOggi")) {
     $("a-dataUltimoContatto").value = oggiISO();
     if ($("a-stato").value === "Da contattare") $("a-stato").value = "Conosciuto";
