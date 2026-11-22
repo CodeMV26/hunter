@@ -164,7 +164,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.8</small></h1>
+    <h1>Hunter <small>v1.9</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -324,10 +324,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.8 (promemoria "Nuovi annunci da guardare")
+// HUNTER - app web - versione 1.9 (Analizza e prepara legge anche il link dell'annuncio)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.8";
+const VERSIONE_APP = "1.9";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -1265,24 +1265,71 @@ function renderGiro() {
     }).join("");
 }
 
+// Proposta 38: dati ricavabili dall'indirizzo stesso (riserva, se la pagina non si può leggere)
+function slugSemplice(t) {
+  return String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function datiDaLink(link) {
+  const r = { titolo: "", comune: "" };
+  let percorso = "";
+  try { percorso = decodeURIComponent(new URL(link).pathname); } catch (e) { return r; }
+  const ultimo = percorso.split("/").filter(Boolean).pop() || "";
+  const slug = ultimo.replace(/\.html?$/i, "").replace(/-?\d{6,}$/, "");
+  if (!slug || /^\d+$/.test(slug)) return r;
+  const comuni = impostazioni.zonePreferite.concat(COMUNI_BASE).slice().sort(function (a, b) { return b.length - a.length; });
+  let resto = slug;
+  for (const c of comuni) {
+    const cs = slugSemplice(c);
+    if (cs && (resto === cs || resto.slice(-(cs.length + 1)) === "-" + cs)) {
+      r.comune = c;
+      resto = resto === cs ? "" : resto.slice(0, -(cs.length + 1));
+      break;
+    }
+  }
+  const t = resto.replace(/-/g, " ").trim();
+  r.titolo = t ? t.charAt(0).toUpperCase() + t.slice(1) : "";
+  return r;
+}
+
 $("btnAnalizza").addEventListener("click", async function () {
-  const testo = $("testoPost").value.trim();
+  const testoIncollato = $("testoPost").value.trim();
   const link = conLinkCompleto($("linkPost").value);
-  if (!testo && !link) { avviso("Incolla il testo e/o il link", true); return; }
+  if (!testoIncollato && !link) { avviso("Incolla il testo e/o il link", true); return; }
   const b = $("btnAnalizza");
   b.disabled = true;
   const conferme = { ids: [], scartato: false };
   try {
     if (link) {
-      const procedi = await controllaDoppioni({ facebookUrl: link }, conferme);
+      const procedi = await controllaDoppioni({ facebookUrl: link, linkAnnuncio: link }, conferme);
       if (!procedi) return;
     }
+
+    // Proposta 38: se c'è un link di annuncio, Hunter legge la pagina (una sola, su tua richiesta)
+    let ant = null;
+    let datiUrl = { titolo: "", comune: "" };
+    if (link && FONTI_SOCIAL.indexOf(fonteDaLink(link)) === -1) {
+      avviso("⏳ Leggo l'annuncio…");
+      try { ant = await api("POST", "/anteprima", { link: link }); } catch (e) { ant = null; }
+      if (ant && !ant.ok) ant = null;
+      datiUrl = datiDaLink(link);
+    }
+    if (link && !testoIncollato && !ant) {
+      // Nulla di leggibile: si resta in Ricerca, con il link ancora nel campo
+      avviso("⚠️ Non sono riuscito a leggere la pagina dell'annuncio. Aprilo, seleziona tutto il testo (titolo, prezzo, descrizione), " +
+        "copialo e incollalo nel campo «Testo» qui sopra, poi premi di nuovo «Analizza e prepara». Il link resta già inserito.", true);
+      return;
+    }
+    const testoAnnuncio = ant ? [ant.titolo, ant.descrizione].filter(Boolean).join("\n\n") : "";
+    const testo = testoIncollato || testoAnnuncio;
+
     let segnale = "Altro";
     for (const r of REGOLE_SEGNALI) { if (r[1].test(testo)) { segnale = r[0]; break; } }
     if (segnale === "Altro" && REGEX_VENDITA.test(testo)) segnale = "Vendita Privato";
     if (segnale === "Altro" && /affittasi|affitto\s+(il\s+)?mio|locasi/i.test(testo)) segnale = "Affitto da privato";
-    const noAg = REGEX_NO_AGENZIE.test(testo);
-    const comune = trovaComune(testo);
+    if (ant && ant.tipo === "affitto" && (segnale === "Altro" || segnale === "Vendita Privato")) segnale = "Affitto da privato";
+    if (ant && ant.tipo === "vendita" && segnale === "Altro") segnale = "Vendita Privato";
+    const noAg = REGEX_NO_AGENZIE.test(testo) || !!(ant && ant.privato && /senza agenzi|no agenzi/i.test(testo));
+    const comune = (ant && ant.comune) || trovaComune(testo) || datiUrl.comune;
     const priorita = noAg ? "Bassa" : (["Successione", "Separazione", "Trasferimento"].indexOf(segnale) !== -1 ? "Alta" : "Media");
     let fonte = $("fontePost").value || fonteDaLink(link);
     if (!fonte) {
@@ -1300,7 +1347,9 @@ $("btnAnalizza").addEventListener("click", async function () {
     // Proposta 29: il testo resta COMPLETO; telefono e prezzo vengono riconosciuti
     $("n-testoOriginale").value = testo;
     const telefoni = estraiTelefoni(testo);
-    const prezzoPost = estraiPrezzoPost(testo);
+    const prezzoPost = (ant && ant.prezzo) || estraiPrezzoPost(testo);
+    const titoloAnn = (ant && ant.titolo) || datiUrl.titolo;
+    if (titoloAnn) $("n-nome").value = titoloAnn.slice(0, 200);
     if (telefoni) $("n-telefono").value = telefoni;
     if (prezzoPost) $("n-prezzo").value = prezzoPost;
     if (link) {
@@ -1311,9 +1360,14 @@ $("btnAnalizza").addEventListener("click", async function () {
     $("linkPost").value = "";
     $("fontePost").value = "";
     mostraSezione("nuovo");
+    if (ant && !telefoni && /subito\.it/i.test(link)) {
+      avviso("Analisi fatta: " + (titoloAnn || "annuncio") + (comune ? " · " + comune : "") + " · 💶 " + (prezzoPost ? euro(prezzoPost) : "prezzo non trovato") +
+        " · 📞 Su Subito il telefono non è pubblico: usa il pulsante «Contatta» dell'annuncio. Controlla e salva.");
+      return;
+    }
     avviso("Analisi fatta: " + segnale + (comune ? " · " + comune : "") + " · " + fonte +
       " · 📞 " + (telefoni || "telefono non trovato") + " · 💶 " + (prezzoPost ? euro(prezzoPost) : "prezzo non trovato") +
-      ". Testo completo salvato (" + testo.length + " caratteri). Controlla, scrivi il nome e salva.");
+      ". Testo completo salvato (" + testo.length + " caratteri). Controlla" + (titoloAnn ? "" : ", scrivi il nome") + " e salva.");
     if (testo.length > LIMITI_NOTIZIA.testoOriginale) {
       avviso("⚠️ Il testo è lunghissimo (" + testo.length + " caratteri, massimo " + LIMITI_NOTIZIA.testoOriginale + "): accorcialo prima di salvare.", true);
     }
