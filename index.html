@@ -164,7 +164,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.6</small></h1>
+    <h1>Hunter <small>v1.8</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -324,10 +324,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.6 (testo del post sempre completo, telefono e prezzo riconosciuti)
+// HUNTER - app web - versione 1.8 (promemoria "Nuovi annunci da guardare")
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.6";
+const VERSIONE_APP = "1.8";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -575,6 +575,37 @@ $("btnAggiorna").addEventListener("click", async function () {
 });
 
 // ---------------- Caricamento dati ----------------
+let promemoria = [];
+
+function promemoriaHTML() {
+  if (!promemoria.length) return "";
+  return '<h3>📬 Nuovi annunci da guardare (' + promemoria.length + ')</h3>' +
+    promemoria.map(function (p) {
+      const link = linkSicuro(p.link);
+      const dettagli = [p.tipo, p.inserzionista, p.categoria].filter(Boolean).join(" · ");
+      const quando = p.aggiornatoIl || p.createdAt;
+      return '<div class="card">' +
+        '<div class="titolo">🟣 ' + esc(p.portale) + ' · ' + esc(String(p.conteggio || 0)) + ' nuovi annunci</div>' +
+        '<div class="sotto">' + esc([p.ricerca, dettagli].filter(Boolean).join(" · ")) + '</div>' +
+        '<div class="sotto">' + esc("Ultima email: " + formattaData(quando) + (quando ? " " + new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "") +
+          (Number(p.email) > 1 ? " · " + p.email + " email oggi" : "")) + '</div>' +
+        '<div class="azioni-card">' +
+          (link ? '<a class="btn piccolo" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">Apri su ' + esc(p.portale) + ' ↗</a>' : "") +
+          '<button type="button" class="btn secondario piccolo" data-promemoria-fatto="' + esc(p.id) + '">Fatto ✓</button>' +
+        '</div></div>';
+    }).join("") +
+    '<div class="testo-aiuto">Annunci interessanti: copia il link dell\'annuncio e incollalo in 🔎 Ricerca → Analizza e prepara.</div>';
+}
+
+async function promemoriaFatto(id) {
+  try {
+    await api("PATCH", "/promemoria/" + encodeURIComponent(id), { fatto: true });
+    promemoria = promemoria.filter(function (p) { return p.id !== id; });
+    renderTutto();
+    avviso("✓ Promemoria completato");
+  } catch (e) { gestisciErrore(e); }
+}
+
 async function caricaTutto() {
   $("sez-dashboard").innerHTML = '<div class="caricamento">Caricamento…</div>';
   try {
@@ -587,6 +618,8 @@ async function caricaTutto() {
     leads = r[0].leads || [];
     amministratori = r[1].amministratori || [];
     radar = r[2].radar || [];
+    // Proposta 36: promemoria (se il Worker non è ancora aggiornato, la Dashboard funziona lo stesso)
+    try { promemoria = (await api("GET", "/promemoria")).promemoria || []; } catch (e) { promemoria = []; }
     impostazioni = {
       fontiAttive: Object.assign({}, FONTI_DEFAULT, r[3].fontiAttive || {}),
       zonePreferite: r[3].zonePreferite || [],
@@ -900,6 +933,8 @@ document.addEventListener("click", function (ev) {
   if (sposta) { ev.preventDefault(); spostaFase(sposta.dataset.sposta, Number(sposta.dataset.delta)); return; }
   const letto = t.closest("[data-radar-letto]");
   if (letto) { ev.preventDefault(); segnaRadar(letto.dataset.radarLetto); return; }
+  const pf = t.closest("[data-promemoria-fatto]");
+  if (pf) { ev.preventDefault(); promemoriaFatto(pf.dataset.promemoriaFatto); return; }
   const elimRadar = t.closest("[data-radar-elimina]");
   if (elimRadar) { ev.preventDefault(); eliminaRadar(elimRadar.dataset.radarElimina); return; }
   const vai = t.closest("[data-vai]");
@@ -950,6 +985,7 @@ function renderDashboard() {
 
   $("sez-dashboard").innerHTML =
     '<h2>Dashboard</h2>' +
+    promemoriaHTML() +
     '<div class="griglia">' +
       '<div class="numero"><div class="val">' + aperte.length + '</div><div class="lab">Notizie aperte</div></div>' +
       '<div class="numero"><div class="val">' + daContattare + '</div><div class="lab">Da contattare</div></div>' +
@@ -1302,6 +1338,13 @@ $("btnScarta").addEventListener("click", async function () {
 });
 
 // ---------------- Radar di zona ----------------
+// Proposta 37: etichetta breve dell'avviso al posto del testo con gli OR
+function etichettaRicerca(r) {
+  const t = String(r || "").replace(/[()"]/g, " ").replace(/\s+OR\s+/gi, ", ").replace(/\s+/g, " ").trim();
+  if (!t) return "";
+  return "Avviso: " + (t.length > 50 ? t.slice(0, 50).replace(/[,\s]+$/, "") + "…" : t);
+}
+
 function renderRadar() {
   const aperte = leads.filter(function (l) { return FASI_CHIUSE.indexOf(l.fase) === -1; });
   const conteggi = {};
@@ -1340,7 +1383,7 @@ function renderRadar() {
     const link = linkSicuro(r.link);
     return '<div class="card"' + (r.letto ? ' style="opacity:.55"' : "") + '>' +
       '<div class="titolo">' + (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.titolo || "Notizia") + '</a>' : esc(r.titolo || "Notizia")) + '</div>' +
-      '<div class="sotto">' + esc([r.comune, formattaData(r.createdAt), r.ricerca].filter(Boolean).join(" · ")) + '</div>' +
+      '<div class="sotto">' + esc([r.comune ? "📍 " + r.comune : "", formattaData(r.createdAt), etichettaRicerca(r.ricerca)].filter(Boolean).join(" · ")) + '</div>' +
       (r.estratto ? '<div class="estratto">' + esc(r.estratto) + '</div>' : "") +
       '<div class="azioni-card">' +
         '<button type="button" class="btn secondario piccolo" data-radar-letto="' + esc(r.id) + '">' + (r.letto ? "↺ Da leggere" : "✓ Letta") + '</button>' +
