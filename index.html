@@ -103,6 +103,17 @@ nav button.attivo{color:var(--accento);font-weight:700;}
 .badge.vendita{background:#f3f4f6;color:#111827;font-weight:800;}
 .badge.affitto{background:#22d3ee;color:#062a30;font-weight:800;}
 .legenda{font-size:13px;}
+.richiami{background:var(--card);border:1px solid var(--bordo);border-radius:12px;padding:4px 12px;margin:4px 0 14px;}
+.riga-richiamo{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bordo);cursor:pointer;}
+.riga-richiamo:last-child{border-bottom:none;}
+.riga-richiamo .pallino{width:12px;height:12px;border-radius:50%;flex:none;}
+.riga-richiamo .testo{flex:1;min-width:0;font-size:15px;}
+.riga-richiamo .testo b{color:var(--accento);}
+.riga-richiamo .quando{font-size:13px;font-weight:700;white-space:nowrap;}
+.riga-richiamo .quando.ritardo{color:#fca5a5;}
+.riga-richiamo .quando.oggi{color:#fde68a;}
+.riga-richiamo a.tel{text-decoration:none;font-size:20px;flex:none;}
+.pallino.o-radar{background:#2dd4bf;}.pallino.o-auto{background:#a78bfa;}.pallino.o-subito{background:#fb923c;}.pallino.o-manuale{background:#60a5fa;}.pallino.amm{background:#9ca3af;}
 .legenda summary{cursor:pointer;color:var(--grigio);font-weight:600;padding:4px 0 8px;}
 .legenda .riga-badge{margin-bottom:6px;}
 
@@ -195,7 +206,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v2.1.1</small></h1>
+    <h1>Hunter <small>v2.2</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -354,10 +365,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 2.1 (colori per origine, fase e vendita/affitto)
+// HUNTER - app web - versione 2.2 (Dashboard: richiami compatti a scomparsa; proposta 48)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "2.1.1";
+const VERSIONE_APP = "2.2";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -608,6 +619,8 @@ $("btnAggiorna").addEventListener("click", async function () {
 let promemoria = [];
 let radarInCorso = null;      // Proposta 42: notizia di zona da cui si sta creando la notizia
 let mostraTutteCalde = false; // Proposta 41
+let richiamiAperti = null;    // A + C: null = automatico (aperto se ci sono ritardi)
+let tuttiRichiami = false;
 
 function promemoriaHTML() {
   if (!promemoria.length) return "";
@@ -864,6 +877,15 @@ function estraiPrezzoPost(testo) {
 document.addEventListener("change", function (ev) {
   const t = ev.target;
   if (!t) return;
+  // Proposta 48: "Già contattato" spuntato -> la fase passa a "Contattato"
+  if (t.id && /-contattato$/.test(t.id) && t.checked) {
+    const p = t.id.split("-")[0];
+    const sel = $(p + "-fase");
+    if (sel && FASI.indexOf(sel.value) < FASI.indexOf("Contattato")) {
+      sel.value = "Contattato";
+      avviso("Fase aggiornata a «Contattato»");
+    }
+  }
   if (t.id && /-fase$/.test(t.id)) {
     const p = t.id.split("-")[0];
     if (FASI.indexOf(t.value) >= FASI.indexOf("Contattato") && $(p + "-contattato")) {
@@ -960,6 +982,9 @@ function classeFase(f) {
   return i >= 0 ? "f" + (i + 1) : "fase";
 }
 function tipoContratto(l) {
+  // Proposta 48: decide prima il prezzo
+  if (l.prezzo && l.prezzo >= 10000) return "vendita";
+  if (l.prezzo && l.prezzo > 0) return "affitto";
   if (l.segnale === "Affitto da privato") return "affitto";
   const t = [l.nome, l.titoloAnnuncio, l.testoOriginale].join(" ").toLowerCase();
   if (/\baffitt|in affitto|affittasi|locazione|al mese|\/mese/.test(t) || (l.prezzo && l.prezzo < 10000)) return "affitto";
@@ -969,8 +994,6 @@ function tipoContratto(l) {
 function legendaHTML() {
   return '<details class="legenda"><summary>🎨 Legenda colori</summary>' +
     '<div class="riga-badge">' + Object.keys(ORIGINI).map(function (k) { return '<span class="badge ' + ORIGINI[k].cls + '">' + ORIGINI[k].nome + '</span>'; }).join("") + '</div>' +
-    '<div class="riga-badge">' + FASI.map(function (f) { return '<span class="badge ' + classeFase(f) + '">' + esc(f) + '</span>'; }).join("") + '</div>' +
-    '<div class="riga-badge"><span class="badge vendita">🏷 VENDITA</span><span class="badge affitto">🔑 AFFITTO</span></div>' +
     '</details>';
 }
 
@@ -1034,6 +1057,7 @@ function cardAmmHTML(a) {
 // ---------------- Clic globali ----------------
 document.addEventListener("click", function (ev) {
   const t = ev.target;
+  if (t.closest("a.tel")) return; // chiamata: non aprire la scheda
   const traccia = t.closest("[data-traccia]");
   if (traccia) { registraRicerca(traccia.dataset.traccia, traccia.dataset.canale); return; }
   const su = t.closest("[data-giro-su]");
@@ -1050,6 +1074,10 @@ document.addEventListener("click", function (ev) {
   if (pc) { ev.preventDefault(); creaDaPromemoria(pc.dataset.promemoriaCrea); return; }
   const tc = t.closest("[data-tutte-calde]");
   if (tc) { ev.preventDefault(); mostraTutteCalde = !mostraTutteCalde; renderDashboard(); return; }
+  const tr = t.closest("[data-toggle-richiami]");
+  if (tr) { ev.preventDefault(); richiamiAperti = !statoRichiamiAperti(); renderDashboard(); return; }
+  const vr = t.closest("[data-tutti-richiami]");
+  if (vr) { ev.preventDefault(); tuttiRichiami = !tuttiRichiami; renderDashboard(); return; }
   const sc = t.closest("[data-scorri]");
   if (sc) { ev.preventDefault(); const el = $(sc.dataset.scorri); if (el) el.scrollIntoView({ behavior: "smooth" }); return; }
   const pf = t.closest("[data-promemoria-fatto]");
@@ -1063,6 +1091,24 @@ document.addEventListener("click", function (ev) {
   const apri = t.closest("[data-apri]");
   if (apri) { apriScheda(apri.dataset.apri); }
 });
+
+// ---------------- Dashboard: richiami compatti (A + C) ----------------
+let ultimoRitardo = false;
+function statoRichiamiAperti() {
+  return richiamiAperti === null ? ultimoRitardo : richiamiAperti;
+}
+function rigaRichiamo(nome, numero, sotto, data, origineCls, telefono, attr) {
+  const oggi = oggiISO();
+  const gg = Math.round((Date.parse(oggi) - Date.parse(data)) / 86400000);
+  const quando = gg > 0 ? '<span class="quando ritardo">⏰ ' + gg + ' gg. di ritardo</span>' : '<span class="quando oggi">oggi</span>';
+  const tel = String(telefono || "").split(",")[0].trim();
+  return '<div class="riga-richiamo" ' + attr + '>' +
+    '<span class="pallino ' + origineCls + '"></span>' +
+    '<span class="testo">' + (numero ? "<b>" + esc(numero) + "</b> " : "") + esc(nome) + (sotto ? ' · <span style="color:var(--grigio)">' + esc(sotto) + '</span>' : "") + '</span>' +
+    quando +
+    (tel ? '<a class="tel" href="tel:' + esc(tel.replace(/[^\d+]/g, "")) + '" title="Chiama ' + esc(tel) + '">📞</a>' : "") +
+    '</div>';
+}
 
 // ---------------- Dashboard ----------------
 function barreHTML(valori, campo) {
@@ -1105,27 +1151,37 @@ function renderDashboard() {
   const nRichiami = richiami.length + richiamiAmm.length;
   const nAnnunci = promemoria.reduce(function (t, p) { return t + (Number(p.conteggio) || 0); }, 0);
   const caldeVisibili = mostraTutteCalde ? calde : calde.slice(0, 5);
+  // A + C: lista compatta a scomparsa, aperta da sola se ci sono richiami in ritardo
+  const oggiD = oggiISO();
+  ultimoRitardo = richiami.some(function (l) { return l.dataProssimoContatto < oggiD; }) ||
+    richiamiAmm.some(function (a) { return a.dataProssimoContatto < oggiD; });
+  const aperti = statoRichiamiAperti();
+  const righe = richiami.map(function (l) {
+    return rigaRichiamo(l.nome || "(senza nome)", numeroNotizia(l), l.comune, l.dataProssimoContatto,
+      ORIGINI[origineNotizia(l)].cls, l.telefono, 'data-apri="' + esc(l.id) + '"');
+  }).concat(richiamiAmm.map(function (a) {
+    return rigaRichiamo("🏢 " + a.nome, "", a.studio, a.dataProssimoContatto, "amm", a.telefono, 'data-amm="' + esc(a.id) + '"');
+  }));
+  const listaRichiamiHTML = '<div class="richiami">' + (tuttiRichiami ? righe : righe.slice(0, 5)).join("") +
+    (righe.length > 5 ? '<div style="padding:8px 0"><button type="button" class="btn secondario piccolo" data-tutti-richiami="1">' +
+      (tuttiRichiami ? "Mostra solo i primi 5" : "Vedi tutti (" + righe.length + ")") + '</button></div>' : "") + '</div>';
   function riquadro(val, lab, extra) {
     return '<div class="numero' + (extra ? " tocca" : "") + '"' + (extra || "") + '><div class="val">' + val + '</div><div class="lab">' + lab + '</div></div>';
   }
 
   $("sez-dashboard").innerHTML =
-    '<h2>Dashboard</h2>' +
     legendaHTML() +
     '<div class="griglia otto">' +
       riquadro(aperte.length, "Notizie aperte") +
       riquadro(daContattare, "Da contattare") +
       riquadro(incarichi, "Incarichi") +
       riquadro(venduti, "Venduti") +
-      riquadro(nRichiami, "📅 Da richiamare oggi", ' data-scorri="sezRichiami"') +
+      riquadro(nRichiami, "📅 Da richiamare (oggi e in ritardo) " + (nRichiami ? (aperti ? "▲" : "▼") : ""), nRichiami ? ' data-toggle-richiami="1"' : "") +
       riquadro(nAnnunci, "📬 Annunci Subito da guardare", ' data-scorri="sezPromemoria"') +
       riquadro(auto7, "🤖 Notizie da Fonti Automatiche negli ultimi 7 gg.") +
       riquadro(radarDaLeggere, "📡 Notizie di Zona da Leggere in Radar", ' data-vai="radar"') +
     '</div>' +
-    '<h3 id="sezRichiami">📅 Da richiamare (oggi e in ritardo) (' + nRichiami + ')</h3>' +
-    (nRichiami
-      ? richiami.map(function (l) { return cardNotiziaHTML(l, false); }).join("") + richiamiAmm.map(cardAmmHTML).join("")
-      : '<div class="vuoto">Nessuno da richiamare oggi.</div>') +
+    (aperti && nRichiami ? listaRichiamiHTML : "") +
     '<h3>🔥 Le ' + (mostraTutteCalde ? "" : Math.min(5, calde.length) + " ") + 'notizie più calde</h3>' +
     (caldeVisibili.length ? caldeVisibili.map(function (l) { return cardNotiziaHTML(l, false); }).join("") : '<div class="vuoto">Nessuna notizia da contattare.</div>') +
     (calde.length > 5 ? '<button type="button" class="btn secondario piccolo" data-tutte-calde="1">' + (mostraTutteCalde ? "Mostra solo le prime 5" : "Mostra tutte (" + calde.length + ")") + '</button>' : "") +
