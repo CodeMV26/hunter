@@ -82,6 +82,29 @@ nav button.attivo{color:var(--accento);font-weight:700;}
 .badge.ok{background:#14361f;color:#86efac;}
 .badge.punti{background:#4a2a0f;color:#fdba74;}
 .badge.auto{background:#2e1f4d;color:#c4b5fd;}
+/* Proposta 47: origine della notizia (bordo sinistro + etichetta) */
+.card.o-radar{border-left:6px solid #2dd4bf;background:#12262a;}
+.card.o-auto{border-left:6px solid #a78bfa;background:#1d1a2e;}
+.card.o-subito{border-left:6px solid #fb923c;background:#2b1c10;}
+.card.o-manuale{border-left:6px solid #60a5fa;}
+.badge.o-radar{background:#134e4a;color:#99f6e4;}
+.badge.o-auto{background:#3b2a6b;color:#ddd6fe;}
+.badge.o-subito{background:#7c3a0a;color:#fed7aa;}
+.badge.o-manuale{background:#1e3a5f;color:#bfdbfe;}
+/* Proposta 47: fasi */
+.badge.f1{background:#374151;color:#f3f4f6;}
+.badge.f2{background:#713f12;color:#fde68a;}
+.badge.f3{background:#164e63;color:#a5f3fc;}
+.badge.f4{background:#831843;color:#fbcfe8;}
+.badge.f5{background:#4c1d95;color:#ddd6fe;}
+.badge.f6{background:#14532d;color:#bbf7d0;}
+.badge.f7{background:#a16207;color:#fef9c3;}
+/* Proposta 47: vendita / affitto */
+.badge.vendita{background:#f3f4f6;color:#111827;font-weight:800;}
+.badge.affitto{background:#22d3ee;color:#062a30;font-weight:800;}
+.legenda{font-size:13px;}
+.legenda summary{cursor:pointer;color:var(--grigio);font-weight:600;padding:4px 0 8px;}
+.legenda .riga-badge{margin-bottom:6px;}
 
 /* ---------- Dashboard ---------- */
 .griglia{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -172,7 +195,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v2.0</small></h1>
+    <h1>Hunter <small>v2.1.1</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -187,6 +210,7 @@ details.colonna .card{background:var(--card2);}
 
     <section id="sez-archivio" hidden>
       <h2>Archivio Notizie</h2>
+      <div id="legendaArchivio"></div>
       <div class="filtri">
         <input class="intero" type="search" id="cerca" placeholder="Cerca n. notizia, nome, comune, note, annuncio…">
         <select id="filtroFase"></select>
@@ -330,10 +354,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 2.0 (proposte 31, 39, 41, 42, 43)
+// HUNTER - app web - versione 2.1 (colori per origine, fase e vendita/affitto)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "2.0";
+const VERSIONE_APP = "2.1.1";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -592,8 +616,10 @@ function promemoriaHTML() {
       const link = linkSicuro(p.link);
       const dettagli = [p.tipo, p.inserzionista, p.categoria].filter(Boolean).join(" · ");
       const quando = p.aggiornatoIl || p.createdAt;
-      return '<div class="card">' +
-        '<div class="titolo">🟣 ' + esc(p.portale) + ' · ' + esc(String(p.conteggio || 0)) + ' nuovi annunci</div>' +
+      const contrattoP = /affitt/i.test(p.tipo || "") ? "affitto" : /vendit/i.test(p.tipo || "") ? "vendita" : "";
+      return '<div class="card o-subito">' +
+        (contrattoP ? '<div class="riga-badge" style="margin-bottom:6px"><span class="badge ' + contrattoP + '">' + (contrattoP === "affitto" ? "🔑 AFFITTO" : "🏷 VENDITA") + '</span></div>' : "") +
+        '<div class="titolo">🟠 ' + esc(p.portale) + ' · ' + esc(String(p.conteggio || 0)) + ' nuovi annunci</div>' +
         '<div class="sotto">' + esc([p.ricerca, dettagli].filter(Boolean).join(" · ")) + '</div>' +
         '<div class="sotto">' + esc("Ultima email: " + formattaData(quando) + (quando ? " " + new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "") +
           (Number(p.email) > 1 ? " · " + p.email + " email oggi" : "")) + '</div>' +
@@ -916,15 +942,50 @@ $("formNuovo").addEventListener("submit", async function (ev) {
   }
 });
 
+// ---------------- Proposta 47: colori ----------------
+const ORIGINI = {
+  radar: { cls: "o-radar", nome: "📡 Da Radar di zona" },
+  auto: { cls: "o-auto", nome: "🤖 Fonte automatica" },
+  subito: { cls: "o-subito", nome: "🟠 Da Subito" },
+  manuale: { cls: "o-manuale", nome: "✍️ Inserita a mano" }
+};
+function origineNotizia(l) {
+  if (l.origineRadar || l.fonte === "Radar di zona") return "radar";
+  if (/subito\.it/i.test(String(l.linkAnnuncio || "")) || /subito/i.test(String(l.portale || ""))) return "subito";
+  if (l.automatica) return "auto";
+  return "manuale";
+}
+function classeFase(f) {
+  const i = FASI.indexOf(f);
+  return i >= 0 ? "f" + (i + 1) : "fase";
+}
+function tipoContratto(l) {
+  if (l.segnale === "Affitto da privato") return "affitto";
+  const t = [l.nome, l.titoloAnnuncio, l.testoOriginale].join(" ").toLowerCase();
+  if (/\baffitt|in affitto|affittasi|locazione|al mese|\/mese/.test(t) || (l.prezzo && l.prezzo < 10000)) return "affitto";
+  if (/vendita|vendo|vendesi|in vendita/.test(t) || ["Vendita Privato", "Ribasso prezzo"].indexOf(l.segnale) !== -1 || (l.prezzo && l.prezzo >= 10000)) return "vendita";
+  return "";
+}
+function legendaHTML() {
+  return '<details class="legenda"><summary>🎨 Legenda colori</summary>' +
+    '<div class="riga-badge">' + Object.keys(ORIGINI).map(function (k) { return '<span class="badge ' + ORIGINI[k].cls + '">' + ORIGINI[k].nome + '</span>'; }).join("") + '</div>' +
+    '<div class="riga-badge">' + FASI.map(function (f) { return '<span class="badge ' + classeFase(f) + '">' + esc(f) + '</span>'; }).join("") + '</div>' +
+    '<div class="riga-badge"><span class="badge vendita">🏷 VENDITA</span><span class="badge affitto">🔑 AFFITTO</span></div>' +
+    '</details>';
+}
+
 // ---------------- Card ----------------
 function cardNotiziaHTML(l, conFrecce) {
   const oggi = oggiISO();
   const b = [];
   if (typeof l.punteggio === "number" && FASI.indexOf(l.fase) <= 1) b.push('<span class="badge punti">🔥 ' + l.punteggio + '</span>');
-  b.push('<span class="badge fase">' + esc(l.fase) + '</span>');
+  const origine = origineNotizia(l);
+  const contratto = tipoContratto(l);
+  if (contratto) b.unshift('<span class="badge ' + contratto + '">' + (contratto === "affitto" ? "🔑 AFFITTO" : "🏷 VENDITA") + '</span>');
+  b.push('<span class="badge ' + classeFase(l.fase) + '">' + esc(l.fase) + '</span>');
+  b.push('<span class="badge ' + ORIGINI[origine].cls + '">' + ORIGINI[origine].nome + (l.origineRadar ? " " + esc(l.origineRadar) : "") + '</span>');
   b.push('<span class="badge ' + classePriorita(l.priorita) + '">' + esc(l.priorita) + '</span>');
-  if (l.automatica) b.push('<span class="badge auto">🤖 ' + esc(l.portale || "Automatica") + '</span>');
-  else if (l.fonte) b.push('<span class="badge">' + esc(l.fonte) + '</span>');
+  if (l.fonte && origine === "manuale") b.push('<span class="badge">' + esc(l.fonte) + '</span>');
   if (l.contattato) b.push('<span class="badge ok">Contattato</span>');
   if (l.prezzo) b.push('<span class="badge">' + esc(euro(l.prezzo)) + '</span>');
   if (l.ribassi) b.push('<span class="badge alta">📉 ribasso ×' + esc(l.ribassi) + '</span>');
@@ -940,7 +1001,7 @@ function cardNotiziaHTML(l, conFrecce) {
   }
   b.push('<span class="badge">' + esc(formattaData(l.createdAt)) + '</span>');
 
-  let h = '<div class="card cliccabile" data-apri="' + esc(l.id) + '">' +
+  let h = '<div class="card cliccabile ' + ORIGINI[origine].cls + '" data-apri="' + esc(l.id) + '">' +
     '<div class="titolo">' + (numeroNotizia(l) ? '<span class="num-notizia">' + esc(numeroNotizia(l)) + '</span>' : "") + esc(l.nome || "(senza nome)") + '</div>' +
     '<div class="sotto">' + esc([l.comune, l.segnale].filter(Boolean).join(" · ") || "—") + '</div>' +
     '<div class="riga-badge">' + b.join("") + '</div>';
@@ -1017,6 +1078,7 @@ function barreHTML(valori, campo) {
 }
 
 function renderDashboard() {
+  if ($("legendaArchivio")) $("legendaArchivio").innerHTML = legendaHTML();
   const oggi = oggiISO();
   const aperte = leads.filter(function (l) { return FASI_CHIUSE.indexOf(l.fase) === -1; });
   const daContattare = aperte.filter(function (l) { return !l.contattato; }).length;
@@ -1049,6 +1111,7 @@ function renderDashboard() {
 
   $("sez-dashboard").innerHTML =
     '<h2>Dashboard</h2>' +
+    legendaHTML() +
     '<div class="griglia otto">' +
       riquadro(aperte.length, "Notizie aperte") +
       riquadro(daContattare, "Da contattare") +
@@ -1184,7 +1247,7 @@ function renderPipeline() {
       .sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); });
     const aperta = !fasiChiuse.has(f);
     return '<details class="colonna" data-fase="' + esc(f) + '"' + (aperta ? " open" : "") + '>' +
-      '<summary><span>' + esc(f) + '</span><span class="badge">' + lista.length + '</span></summary>' +
+      '<summary><span class="badge ' + classeFase(f) + '" style="font-size:14px">' + esc(f) + '</span><span class="badge">' + lista.length + '</span></summary>' +
       '<div class="contenuto">' +
         (lista.length ? lista.map(function (l) { return cardNotiziaHTML(l, true); }).join("") : '<div class="vuoto">Nessuna notizia in questa fase.</div>') +
       '</div></details>';
@@ -1514,7 +1577,7 @@ function renderRadar() {
   });
   $("listaRadar").innerHTML = lista.length ? lista.map(function (r) {
     const link = linkSicuro(r.link);
-    return '<div class="card"' + (r.letto ? ' style="opacity:.55"' : "") + '>' +
+    return '<div class="card o-radar"' + (r.letto ? ' style="opacity:.55"' : "") + '>' +
       '<div class="titolo">' + (Number(r.numero) > 0 ? '<span class="num-radar">NZR-' + esc(r.numero) + '</span>' : "") +
         (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.titolo || "Notizia") + '</a>' : esc(r.titolo || "Notizia")) + '</div>' +
       (r.notiziaId ? '<div class="riga-badge"><span class="badge ok" data-apri="' + esc(r.notiziaId) + '" style="cursor:pointer">✅ Trasformata in notizia' + (Number(r.notiziaNumero) > 0 ? " n. " + esc(r.notiziaNumero) : "") + '</span></div>' : "") +
