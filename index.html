@@ -88,6 +88,14 @@ nav button.attivo{color:var(--accento);font-weight:700;}
 .numero{background:var(--card);border:1px solid var(--bordo);border-radius:12px;padding:14px;}
 .numero .val{font-size:28px;font-weight:800;color:var(--accento);}
 .numero .lab{font-size:13px;color:var(--grigio);}
+.griglia.otto{grid-auto-rows:1fr;}
+.griglia.otto .numero{display:flex;flex-direction:column;justify-content:center;min-height:96px;}
+.numero.tocca{cursor:pointer;border-color:var(--accento);}
+.num-radar{color:var(--accento);font-weight:800;margin-right:6px;}
+details.statistiche{margin-top:18px;}
+details.statistiche summary{cursor:pointer;font-weight:700;font-size:17px;padding:10px 0;color:var(--testo);}
+.riga-link{display:flex;gap:8px;margin-top:10px;}
+.riga-link input{flex:1;min-width:0;}
 .barra-riga{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px;}
 .barra-riga .nome{width:122px;flex-shrink:0;}
 .barra-riga .barra{flex:1;background:#2a2f3a;border-radius:6px;height:12px;overflow:hidden;}
@@ -164,7 +172,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.9.1</small></h1>
+    <h1>Hunter <small>v2.0</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -215,9 +223,6 @@ details.colonna .card{background:var(--card2);}
 
     <section id="sez-ricerca" hidden>
       <h2>🔎 Ricerca</h2>
-      <h3 style="margin-top:4px">✅ Giro quotidiano</h3>
-      <div class="card" id="giro"></div>
-
       <h3>Cerca su tutti i canali</h3>
       <p class="info">Scegli zona e parola: ogni pulsante apre la ricerca già pronta. Sotto ogni pulsante vedi quando l'hai usato l'ultima volta: scorri i risultati solo fino a lì.</p>
       <div class="riga2">
@@ -248,6 +253,7 @@ details.colonna .card{background:var(--card2);}
       <div id="zoneCalde"></div>
       <h3>Notizie di zona</h3>
       <div class="filtri">
+        <input type="search" id="radarCerca" placeholder="Cerca NZR-7, 7 o una parola…">
         <select id="radarComune"></select>
         <select id="radarStato">
           <option value="">Tutte</option>
@@ -324,10 +330,10 @@ details.colonna .card{background:var(--card2);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =============================================================
-// HUNTER - app web - versione 1.9 (Analizza e prepara legge anche il link dell'annuncio)
+// HUNTER - app web - versione 2.0 (proposte 31, 39, 41, 42, 43)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.9.1";
+const VERSIONE_APP = "2.0";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -576,10 +582,12 @@ $("btnAggiorna").addEventListener("click", async function () {
 
 // ---------------- Caricamento dati ----------------
 let promemoria = [];
+let radarInCorso = null;      // Proposta 42: notizia di zona da cui si sta creando la notizia
+let mostraTutteCalde = false; // Proposta 41
 
 function promemoriaHTML() {
   if (!promemoria.length) return "";
-  return '<h3>📬 Nuovi annunci da guardare (' + promemoria.length + ')</h3>' +
+  return '<h3 id="sezPromemoria">📬 Nuovi annunci da guardare (' + promemoria.length + ')</h3>' +
     promemoria.map(function (p) {
       const link = linkSicuro(p.link);
       const dettagli = [p.tipo, p.inserzionista, p.categoria].filter(Boolean).join(" · ");
@@ -589,12 +597,45 @@ function promemoriaHTML() {
         '<div class="sotto">' + esc([p.ricerca, dettagli].filter(Boolean).join(" · ")) + '</div>' +
         '<div class="sotto">' + esc("Ultima email: " + formattaData(quando) + (quando ? " " + new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "") +
           (Number(p.email) > 1 ? " · " + p.email + " email oggi" : "")) + '</div>' +
+        '<div class="riga-link">' +
+          '<input type="url" id="pl-' + esc(p.id) + '" inputmode="url" autocapitalize="off" placeholder="Incolla qui il link dell\'annuncio">' +
+          '<button type="button" class="btn piccolo" data-promemoria-crea="' + esc(p.id) + '">➕ Crea notizia</button>' +
+        '</div>' +
         '<div class="azioni-card">' +
           (link ? '<a class="btn piccolo" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">Apri su ' + esc(p.portale) + ' ↗</a>' : "") +
           '<button type="button" class="btn secondario piccolo" data-promemoria-fatto="' + esc(p.id) + '">Fatto ✓</button>' +
         '</div></div>';
     }).join("") +
-    '<div class="testo-aiuto">Annunci interessanti: copia il link dell\'annuncio e incollalo in 🔎 Ricerca → Analizza e prepara.</div>';
+    '<div class="testo-aiuto">Apri la ricerca, copia il link di un annuncio interessante, incollalo nel riquadro e premi ➕ Crea notizia. Quando hai finito premi Fatto ✓.</div>';
+}
+
+// Proposta 42: dal Radar alla notizia
+async function creaDaRadar(id) {
+  const r = radar.find(function (x) { return x.id === id; });
+  if (!r) return;
+  mostraSezione("ricerca");
+  $("linkPost").value = r.link || "";
+  $("testoPost").value = [r.titolo, r.estratto].filter(Boolean).join("\n\n");
+  $("fontePost").value = "Radar di zona";
+  await analizza();
+  if (!$("sez-nuovo").hidden && $("n-nome")) {
+    radarInCorso = r.id;
+    if (!$("n-nome").value && r.titolo) $("n-nome").value = r.titolo.slice(0, 200);
+    if (!$("n-comune").value && r.comune) $("n-comune").value = r.comune;
+    if (Number(r.numero) > 0) avviso("Notizia preparata da NZR-" + r.numero + ": controlla e premi Salva. La notizia di zona diventerà «letta».");
+  }
+}
+
+// Proposta 39: dal promemoria Subito alla notizia
+async function creaDaPromemoria(id) {
+  const campo = $("pl-" + id);
+  const link = conLinkCompleto(campo ? campo.value : "");
+  if (!link) { avviso("Incolla prima il link dell'annuncio", true); return; }
+  mostraSezione("ricerca");
+  $("linkPost").value = link;
+  $("testoPost").value = "";
+  $("fontePost").value = "";
+  await analizza();
 }
 
 async function promemoriaFatto(id) {
@@ -840,6 +881,7 @@ async function controllaDoppioni(dati, conferme) {
 
 // ---------------- Nuova notizia ----------------
 function costruisciFormNuovo() {
+  radarInCorso = null;
   $("formNuovo").innerHTML = campiNotiziaHTML("n", {}) +
     '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva notizia</button>';
   confermeNuovo = { ids: [], scartato: false };
@@ -858,8 +900,12 @@ $("formNuovo").addEventListener("submit", async function (ev) {
       facebookUrl: dati.facebookUrl, linkAnnuncio: dati.linkAnnuncio, nome: dati.nome, comune: dati.comune
     }, confermeNuovo);
     if (!procedi) { b.disabled = false; return; }
+    if (radarInCorso) dati.radarId = radarInCorso;
     const r = await api("POST", "/leads", dati);
+    radarInCorso = null;
     leads.unshift(r.lead);
+    // Proposta 42: aggiorna le notizie di zona (diventate "lette")
+    try { radar = (await api("GET", "/radar")).radar || radar; } catch (e) {}
     renderTutto();
     costruisciFormNuovo();
     window.scrollTo(0, 0);
@@ -887,6 +933,10 @@ function cardNotiziaHTML(l, conFrecce) {
   if (l.dataProssimoContatto) {
     const scaduto = l.dataProssimoContatto <= oggi;
     b.push('<span class="badge ' + (scaduto ? "alta" : "") + '">📅 ' + esc(formattaGiorno(l.dataProssimoContatto)) + '</span>');
+    if (l.dataProssimoContatto < oggi && FASI_CHIUSE.indexOf(l.fase) === -1) {
+      const gg = Math.round((Date.parse(oggi) - Date.parse(l.dataProssimoContatto)) / 86400000);
+      b.push('<span class="badge alta">⏰ in ritardo di ' + gg + ' gg.</span>');
+    }
   }
   b.push('<span class="badge">' + esc(formattaData(l.createdAt)) + '</span>');
 
@@ -933,6 +983,14 @@ document.addEventListener("click", function (ev) {
   if (sposta) { ev.preventDefault(); spostaFase(sposta.dataset.sposta, Number(sposta.dataset.delta)); return; }
   const letto = t.closest("[data-radar-letto]");
   if (letto) { ev.preventDefault(); segnaRadar(letto.dataset.radarLetto); return; }
+  const rc = t.closest("[data-radar-crea]");
+  if (rc) { ev.preventDefault(); creaDaRadar(rc.dataset.radarCrea); return; }
+  const pc = t.closest("[data-promemoria-crea]");
+  if (pc) { ev.preventDefault(); creaDaPromemoria(pc.dataset.promemoriaCrea); return; }
+  const tc = t.closest("[data-tutte-calde]");
+  if (tc) { ev.preventDefault(); mostraTutteCalde = !mostraTutteCalde; renderDashboard(); return; }
+  const sc = t.closest("[data-scorri]");
+  if (sc) { ev.preventDefault(); const el = $(sc.dataset.scorri); if (el) el.scrollIntoView({ behavior: "smooth" }); return; }
   const pf = t.closest("[data-promemoria-fatto]");
   if (pf) { ev.preventDefault(); promemoriaFatto(pf.dataset.promemoriaFatto); return; }
   const elimRadar = t.closest("[data-radar-elimina]");
@@ -970,8 +1028,7 @@ function renderDashboard() {
   const richiamiAmm = amministratori.filter(function (a) { return a.dataProssimoContatto && a.dataProssimoContatto <= oggi; });
   const calde = leads
     .filter(function (l) { return FASI.indexOf(l.fase) <= 1; })
-    .sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); })
-    .slice(0, 10);
+    .sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); });
   const settimana = Date.now() - 7 * 86400000;
   const auto7 = leads.filter(function (l) { return l.automatica && (Date.parse(l.createdAt || "") || 0) >= settimana; }).length;
   const radarDaLeggere = radar.filter(function (r) { return !r.letto; }).length;
@@ -983,28 +1040,38 @@ function renderDashboard() {
     return '<tr><td>' + esc(f) + '</td><td class="num">' + tot.length + '</td><td class="num">' + inc + '</td><td class="num">' + perc + '%</td></tr>';
   }).join("");
 
+  const nRichiami = richiami.length + richiamiAmm.length;
+  const nAnnunci = promemoria.reduce(function (t, p) { return t + (Number(p.conteggio) || 0); }, 0);
+  const caldeVisibili = mostraTutteCalde ? calde : calde.slice(0, 5);
+  function riquadro(val, lab, extra) {
+    return '<div class="numero' + (extra ? " tocca" : "") + '"' + (extra || "") + '><div class="val">' + val + '</div><div class="lab">' + lab + '</div></div>';
+  }
+
   $("sez-dashboard").innerHTML =
     '<h2>Dashboard</h2>' +
-    promemoriaHTML() +
-    '<div class="griglia">' +
-      '<div class="numero"><div class="val">' + aperte.length + '</div><div class="lab">Notizie aperte</div></div>' +
-      '<div class="numero"><div class="val">' + daContattare + '</div><div class="lab">Da contattare</div></div>' +
-      '<div class="numero"><div class="val">' + incarichi + '</div><div class="lab">Incarichi</div></div>' +
-      '<div class="numero"><div class="val">' + venduti + '</div><div class="lab">Venduti</div></div>' +
+    '<div class="griglia otto">' +
+      riquadro(aperte.length, "Notizie aperte") +
+      riquadro(daContattare, "Da contattare") +
+      riquadro(incarichi, "Incarichi") +
+      riquadro(venduti, "Venduti") +
+      riquadro(nRichiami, "📅 Da richiamare oggi", ' data-scorri="sezRichiami"') +
+      riquadro(nAnnunci, "📬 Annunci Subito da guardare", ' data-scorri="sezPromemoria"') +
+      riquadro(auto7, "🤖 Notizie da Fonti Automatiche negli ultimi 7 gg.") +
+      riquadro(radarDaLeggere, "📡 Notizie di Zona da Leggere in Radar", ' data-vai="radar"') +
     '</div>' +
-    '<div class="riga-badge" style="margin-top:12px">' +
-      '<span class="badge auto">🤖 ' + auto7 + ' trovate in automatico negli ultimi 7 giorni</span>' +
-      (radarDaLeggere ? '<span class="badge fase" data-vai="radar" style="cursor:pointer">📡 ' + radarDaLeggere + ' notizie di zona da leggere</span>' : "") +
-    '</div>' +
-    '<h3>📅 Da richiamare oggi (' + (richiami.length + richiamiAmm.length) + ')</h3>' +
-    (richiami.length || richiamiAmm.length
+    '<h3 id="sezRichiami">📅 Da richiamare (oggi e in ritardo) (' + nRichiami + ')</h3>' +
+    (nRichiami
       ? richiami.map(function (l) { return cardNotiziaHTML(l, false); }).join("") + richiamiAmm.map(cardAmmHTML).join("")
-      : '<div class="vuoto">Nessun richiamo in scadenza.</div>') +
-    '<h3>🔥 Le 10 notizie più calde</h3>' +
-    (calde.length ? calde.map(function (l) { return cardNotiziaHTML(l, false); }).join("") : '<div class="vuoto">Nessuna notizia da contattare.</div>') +
-    '<h3>Notizie per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
-    '<h3>Notizie per segnale</h3><div class="card">' + barreHTML(SEGNALI, "segnale") + '</div>' +
-    '<h3>Resa per fonte</h3><div class="card"><table class="tab"><tr><th>Fonte</th><th class="num">Notizie</th><th class="num">Incarichi</th><th class="num">Resa</th></tr>' + righeFonti + '</table></div>';
+      : '<div class="vuoto">Nessuno da richiamare oggi.</div>') +
+    '<h3>🔥 Le ' + (mostraTutteCalde ? "" : Math.min(5, calde.length) + " ") + 'notizie più calde</h3>' +
+    (caldeVisibili.length ? caldeVisibili.map(function (l) { return cardNotiziaHTML(l, false); }).join("") : '<div class="vuoto">Nessuna notizia da contattare.</div>') +
+    (calde.length > 5 ? '<button type="button" class="btn secondario piccolo" data-tutte-calde="1">' + (mostraTutteCalde ? "Mostra solo le prime 5" : "Mostra tutte (" + calde.length + ")") + '</button>' : "") +
+    (promemoria.length ? promemoriaHTML() : '<h3 id="sezPromemoria">📬 Nuovi annunci da guardare (0)</h3><div class="vuoto">Nessun nuovo annuncio da Subito. Arriveranno con le prossime email.</div>') +
+    '<details class="statistiche"><summary>📊 Statistiche (tocca per aprire)</summary>' +
+      '<h3>Notizie per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
+      '<h3>Notizie per segnale</h3><div class="card">' + barreHTML(SEGNALI, "segnale") + '</div>' +
+      '<h3>Resa per fonte</h3><div class="card"><table class="tab"><tr><th>Fonte</th><th class="num">Notizie</th><th class="num">Incarichi</th><th class="num">Resa</th></tr>' + righeFonti + '</table></div>' +
+    '</details>';
 }
 
 // ---------------- Archivio ----------------
@@ -1023,6 +1090,7 @@ function riempiFiltri() {
     $(id).addEventListener("input", renderAmministratori);
     $(id).addEventListener("change", renderAmministratori);
   });
+  $("radarCerca").addEventListener("input", renderRadar);
   ["radarComune", "radarStato"].forEach(function (id) {
     $(id).addEventListener("change", renderRadar);
   });
@@ -1046,7 +1114,7 @@ function leadsFiltrati() {
     if (fo && (l.fonte || "Altro") !== fo) return false;
     if (q) {
       if (mNum) return Number(l.numero) === Number(mNum[1]);
-      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito, l.titoloAnnuncio, l.portale, l.telefono, l.testoOriginale].join(" ").toLowerCase();
+      const testo = [l.nome, l.comune, l.gruppo, l.note, l.esito, l.titoloAnnuncio, l.portale, l.telefono, l.testoOriginale, l.origineRadar].join(" ").toLowerCase();
       if (testo.indexOf(q) === -1) return false;
     }
     return true;
@@ -1239,6 +1307,7 @@ function spostaGiro(k, delta) {
 }
 
 function renderGiro() {
+  if (!$("giro")) return; // Proposta 31: Giro quotidiano eliminato
   const g = statoGiro();
   const oggi = oggiISO();
   const registrateOggi = leads.filter(function (l) {
@@ -1291,7 +1360,10 @@ function datiDaLink(link) {
   return r;
 }
 
-$("btnAnalizza").addEventListener("click", async function () {
+$("btnAnalizza").addEventListener("click", function () { analizza(); });
+
+// Restituisce true se il modulo "Nuova notizia" è stato preparato
+async function analizza() {
   const testoIncollato = $("testoPost").value.trim();
   const link = conLinkCompleto($("linkPost").value);
   if (!testoIncollato && !link) { avviso("Incolla il testo e/o il link", true); return; }
@@ -1376,7 +1448,8 @@ $("btnAnalizza").addEventListener("click", async function () {
   } finally {
     b.disabled = false;
   }
-});
+  return !$("sez-nuovo").hidden;
+}
 
 $("btnScarta").addEventListener("click", async function () {
   const link = conLinkCompleto($("linkPost").value);
@@ -1428,18 +1501,27 @@ function renderRadar() {
   $("radarComune").innerHTML = opzioni(comuni, comuni.indexOf(selComune) !== -1 ? selComune : "", "Tutti i comuni");
   const filtroComune = $("radarComune").value;
   const soloDaLeggere = $("radarStato").value === "nonlette";
+  const qr = ($("radarCerca").value || "").trim().toLowerCase();
+  const mNzr = qr.match(/^(?:nzr\s*-?\s*)?(\d+)$/);
   const lista = radar.filter(function (r) {
     if (filtroComune && r.comune !== filtroComune) return false;
     if (soloDaLeggere && r.letto) return false;
+    if (qr) {
+      if (mNzr) return Number(r.numero) === Number(mNzr[1]);
+      return [r.titolo, r.estratto, r.comune].join(" ").toLowerCase().indexOf(qr) !== -1;
+    }
     return true;
   });
   $("listaRadar").innerHTML = lista.length ? lista.map(function (r) {
     const link = linkSicuro(r.link);
     return '<div class="card"' + (r.letto ? ' style="opacity:.55"' : "") + '>' +
-      '<div class="titolo">' + (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.titolo || "Notizia") + '</a>' : esc(r.titolo || "Notizia")) + '</div>' +
+      '<div class="titolo">' + (Number(r.numero) > 0 ? '<span class="num-radar">NZR-' + esc(r.numero) + '</span>' : "") +
+        (link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.titolo || "Notizia") + '</a>' : esc(r.titolo || "Notizia")) + '</div>' +
+      (r.notiziaId ? '<div class="riga-badge"><span class="badge ok" data-apri="' + esc(r.notiziaId) + '" style="cursor:pointer">✅ Trasformata in notizia' + (Number(r.notiziaNumero) > 0 ? " n. " + esc(r.notiziaNumero) : "") + '</span></div>' : "") +
       '<div class="sotto">' + esc([r.comune ? "📍 " + r.comune : "", formattaData(r.createdAt), etichettaRicerca(r.ricerca)].filter(Boolean).join(" · ")) + '</div>' +
       (r.estratto ? '<div class="estratto">' + esc(r.estratto) + '</div>' : "") +
       '<div class="azioni-card">' +
+        (r.notiziaId ? "" : '<button type="button" class="btn piccolo" data-radar-crea="' + esc(r.id) + '">➕ Crea notizia</button>') +
         '<button type="button" class="btn secondario piccolo" data-radar-letto="' + esc(r.id) + '">' + (r.letto ? "↺ Da leggere" : "✓ Letta") + '</button>' +
         '<button type="button" class="btn secondario piccolo" data-radar-elimina="' + esc(r.id) + '">🗑 Elimina</button>' +
       '</div></div>';
@@ -1545,6 +1627,7 @@ function apriScheda(id) {
   const info = ["Inserita il " + esc(formattaData(l.createdAt))];
   if (typeof l.punteggio === "number") info.push("🔥 punteggio " + l.punteggio);
   if (l.automatica) info.push("🤖 trovata in automatico" + (l.portale ? " su " + esc(l.portale) : ""));
+  if (l.origineRadar) info.push("📡 Origine: " + esc(l.origineRadar));
   if (l.prezzoIniziale && l.prezzo && l.prezzo < l.prezzoIniziale) info.push("prezzo iniziale " + esc(euro(l.prezzoIniziale)));
   const fb = linkSicuro(l.facebookUrl);
   const ann = linkSicuro(l.linkAnnuncio);
