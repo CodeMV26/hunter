@@ -164,7 +164,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v1.9</small></h1>
+    <h1>Hunter <small>v1.9.1</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -327,7 +327,7 @@ details.colonna .card{background:var(--card2);}
 // HUNTER - app web - versione 1.9 (Analizza e prepara legge anche il link dell'annuncio)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "1.9";
+const VERSIONE_APP = "1.9.1";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -703,7 +703,7 @@ function campiNotiziaHTML(p, l) {
     '<label>Link annuncio o pagina web<input id="' + p + '-linkAnnuncio" inputmode="url" autocapitalize="off" maxlength="500" value="' + esc(l.linkAnnuncio) + '" placeholder="https://..."></label>' +
     '<label>Telefono / contatto<input id="' + p + '-telefono" type="tel" autocapitalize="off" value="' + esc(l.telefono) + '" placeholder="es. 333 1234567"></label>' +
     '<div class="riga2">' +
-      '<label>Prezzo (€)<input id="' + p + '-prezzo" type="number" inputmode="numeric" min="0" step="1000" value="' + esc(l.prezzo === null || l.prezzo === undefined ? "" : l.prezzo) + '"></label>' +
+      '<label>Prezzo (€)<input id="' + p + '-prezzo" type="number" inputmode="numeric" min="0" step="1" value="' + esc(l.prezzo === null || l.prezzo === undefined ? "" : l.prezzo) + '"></label>' +
       '<label>Prossimo contatto<input id="' + p + '-dataProssimoContatto" type="date" value="' + esc(l.dataProssimoContatto) + '"></label>' +
     '</div>' +
     '<label class="check"><input type="checkbox" id="' + p + '-contattato"' + (l.contattato ? " checked" : "") + '> Già contattato</label>' +
