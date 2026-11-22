@@ -206,7 +206,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v2.2</small></h1>
+    <h1>Hunter <small>v2.2.1</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -368,7 +368,7 @@ details.colonna .card{background:var(--card2);}
 // HUNTER - app web - versione 2.2 (Dashboard: richiami compatti a scomparsa; proposta 48)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "2.2";
+const VERSIONE_APP = "2.2.1";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -1134,8 +1134,9 @@ function renderDashboard() {
     .filter(function (l) { return l.dataProssimoContatto && l.dataProssimoContatto <= oggi; })
     .sort(function (a, b) { return a.dataProssimoContatto.localeCompare(b.dataProssimoContatto); });
   const richiamiAmm = amministratori.filter(function (a) { return a.dataProssimoContatto && a.dataProssimoContatto <= oggi; });
-  const calde = leads
-    .filter(function (l) { return FASI.indexOf(l.fase) <= 1; })
+  // Le 3 più calde tra tutte le notizie aperte; "Mostra tutte" = tutte le notizie aperte
+  const calde = aperte
+    .slice()
     .sort(function (a, b) { return (b.punteggio || 0) - (a.punteggio || 0); });
   const settimana = Date.now() - 7 * 86400000;
   const auto7 = leads.filter(function (l) { return l.automatica && (Date.parse(l.createdAt || "") || 0) >= settimana; }).length;
@@ -1150,7 +1151,7 @@ function renderDashboard() {
 
   const nRichiami = richiami.length + richiamiAmm.length;
   const nAnnunci = promemoria.reduce(function (t, p) { return t + (Number(p.conteggio) || 0); }, 0);
-  const caldeVisibili = mostraTutteCalde ? calde : calde.slice(0, 5);
+  const caldeVisibili = mostraTutteCalde ? calde : calde.slice(0, 3);
   // A + C: lista compatta a scomparsa, aperta da sola se ci sono richiami in ritardo
   const oggiD = oggiISO();
   ultimoRitardo = richiami.some(function (l) { return l.dataProssimoContatto < oggiD; }) ||
@@ -1182,9 +1183,11 @@ function renderDashboard() {
       riquadro(radarDaLeggere, "📡 Notizie di Zona da Leggere in Radar", ' data-vai="radar"') +
     '</div>' +
     (aperti && nRichiami ? listaRichiamiHTML : "") +
-    '<h3>🔥 Le ' + (mostraTutteCalde ? "" : Math.min(5, calde.length) + " ") + 'notizie più calde</h3>' +
-    (caldeVisibili.length ? caldeVisibili.map(function (l) { return cardNotiziaHTML(l, false); }).join("") : '<div class="vuoto">Nessuna notizia da contattare.</div>') +
-    (calde.length > 5 ? '<button type="button" class="btn secondario piccolo" data-tutte-calde="1">' + (mostraTutteCalde ? "Mostra solo le prime 5" : "Mostra tutte (" + calde.length + ")") + '</button>' : "") +
+    (mostraTutteCalde
+      ? '<h3>🔥 Tutte le notizie aperte (' + calde.length + '), dalla più calda</h3>'
+      : '<h3>🔥 Le ' + Math.min(3, calde.length) + ' notizie più calde</h3>') +
+    (caldeVisibili.length ? caldeVisibili.map(function (l) { return cardNotiziaHTML(l, false); }).join("") : '<div class="vuoto">Nessuna notizia aperta.</div>') +
+    (calde.length > 3 ? '<button type="button" class="btn secondario piccolo" data-tutte-calde="1">' + (mostraTutteCalde ? "Mostra solo le 3 più calde" : "Mostra tutte le notizie aperte (" + calde.length + ")") + '</button>' : "") +
     (promemoria.length ? promemoriaHTML() : '<h3 id="sezPromemoria">📬 Nuovi annunci da guardare (0)</h3><div class="vuoto">Nessun nuovo annuncio da Subito. Arriveranno con le prossime email.</div>') +
     '<details class="statistiche"><summary>📊 Statistiche (tocca per aprire)</summary>' +
       '<h3>Notizie per fase</h3><div class="card">' + barreHTML(FASI, "fase") + '</div>' +
