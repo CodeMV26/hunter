@@ -90,6 +90,7 @@ nav button.attivo{color:var(--accento);font-weight:700;}
 .badge.o-radar{background:#134e4a;color:#99f6e4;}
 .badge.o-auto{background:#3b2a6b;color:#ddd6fe;}
 .badge.o-subito{background:#7c3a0a;color:#fed7aa;}
+.trasformati{color:#4ade80;white-space:nowrap;}
 .badge.o-manuale{background:#1e3a5f;color:#bfdbfe;}
 /* Proposta 47: fasi */
 .badge.f1{background:#374151;color:#f3f4f6;}
@@ -206,7 +207,7 @@ details.colonna .card{background:var(--card2);}
 <!-- ================= APP ================= -->
 <div id="app" hidden>
   <header>
-    <h1>Hunter <small>v2.2.1</small></h1>
+    <h1>Hunter <small>v2.3</small></h1>
     <button type="button" id="btnAggiorna">⟳ Aggiorna</button>
     <button type="button" id="btnEsci">Esci</button>
   </header>
@@ -368,7 +369,7 @@ details.colonna .card{background:var(--card2);}
 // HUNTER - app web - versione 2.2 (Dashboard: richiami compatti a scomparsa; proposta 48)
 // =============================================================
 const API = "https://hunter-api.mvmymail.workers.dev";
-const VERSIONE_APP = "2.2.1";
+const VERSIONE_APP = "2.3";
 const SEGNALI = ["Trasloco", "Successione", "Separazione", "Trasferimento", "Vendita Privato", "Sgombero", "Affitto da privato", "Ribasso prezzo", "Annuncio fermo", "Cambio casa", "Altro"];
 const FASI = ["Nuova Notizia", "Da Contattare", "Contattato", "Appuntamento", "Valutazione", "Incarico", "Venduto"];
 const PRIORITA = ["Alta", "Media", "Bassa"];
@@ -618,6 +619,9 @@ $("btnAggiorna").addEventListener("click", async function () {
 // ---------------- Caricamento dati ----------------
 let promemoria = [];
 let radarInCorso = null;      // Proposta 42: notizia di zona da cui si sta creando la notizia
+let promemoriaInCorso = null; // Proposta 49 b: promemoria Subito da cui si sta creando la notizia
+// Proposta 49 b: "10+" quando Subito scrive "10 o più"
+function conteggioPromemoria(p) { return String(Number(p.conteggio) || 0) + (p.piu ? "+" : ""); }
 let mostraTutteCalde = false; // Proposta 41
 let richiamiAperti = null;    // A + C: null = automatico (aperto se ci sono ritardi)
 let tuttiRichiami = false;
@@ -632,7 +636,8 @@ function promemoriaHTML() {
       const contrattoP = /affitt/i.test(p.tipo || "") ? "affitto" : /vendit/i.test(p.tipo || "") ? "vendita" : "";
       return '<div class="card o-subito">' +
         (contrattoP ? '<div class="riga-badge" style="margin-bottom:6px"><span class="badge ' + contrattoP + '">' + (contrattoP === "affitto" ? "🔑 AFFITTO" : "🏷 VENDITA") + '</span></div>' : "") +
-        '<div class="titolo">🟠 ' + esc(p.portale) + ' · ' + esc(String(p.conteggio || 0)) + ' nuovi annunci</div>' +
+        '<div class="titolo">🟠 ' + esc(p.portale) + ' · ' + esc(conteggioPromemoria(p)) + ' nuovi annunci' +
+          (Number(p.trasformati) > 0 ? ' · <span class="trasformati">✅ ' + esc(String(p.trasformati)) + (Number(p.trasformati) === 1 ? ' trasformato' : ' trasformati') + ' in notizia</span>' : '') + '</div>' +
         '<div class="sotto">' + esc([p.ricerca, dettagli].filter(Boolean).join(" · ")) + '</div>' +
         '<div class="sotto">' + esc("Ultima email: " + formattaData(quando) + (quando ? " " + new Date(quando).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "") +
           (Number(p.email) > 1 ? " · " + p.email + " email oggi" : "")) + '</div>' +
@@ -675,6 +680,7 @@ async function creaDaPromemoria(id) {
   $("testoPost").value = "";
   $("fontePost").value = "";
   await analizza();
+  if (!$("sez-nuovo").hidden && $("n-nome")) promemoriaInCorso = id;
 }
 
 async function promemoriaFatto(id) {
@@ -930,6 +936,7 @@ async function controllaDoppioni(dati, conferme) {
 // ---------------- Nuova notizia ----------------
 function costruisciFormNuovo() {
   radarInCorso = null;
+  promemoriaInCorso = null;
   $("formNuovo").innerHTML = campiNotiziaHTML("n", {}) +
     '<button type="submit" class="btn largo" id="btnSalvaNuovo">💾 Salva notizia</button>';
   confermeNuovo = { ids: [], scartato: false };
@@ -949,8 +956,15 @@ $("formNuovo").addEventListener("submit", async function (ev) {
     }, confermeNuovo);
     if (!procedi) { b.disabled = false; return; }
     if (radarInCorso) dati.radarId = radarInCorso;
+    if (promemoriaInCorso) dati.promemoriaId = promemoriaInCorso;
+    const daPromemoria = promemoriaInCorso;
     const r = await api("POST", "/leads", dati);
     radarInCorso = null;
+    promemoriaInCorso = null;
+    // Proposta 49 b: aggiorna il conteggio "trasformati in notizia"
+    if (daPromemoria) {
+      try { promemoria = (await api("GET", "/promemoria")).promemoria || promemoria; } catch (e) {}
+    }
     leads.unshift(r.lead);
     // Proposta 42: aggiorna le notizie di zona (diventate "lette")
     try { radar = (await api("GET", "/radar")).radar || radar; } catch (e) {}
@@ -1150,7 +1164,8 @@ function renderDashboard() {
   }).join("");
 
   const nRichiami = richiami.length + richiamiAmm.length;
-  const nAnnunci = promemoria.reduce(function (t, p) { return t + (Number(p.conteggio) || 0); }, 0);
+  const nAnnunci = promemoria.reduce(function (t, p) { return t + (Number(p.conteggio) || 0); }, 0) +
+    (promemoria.some(function (p) { return p.piu; }) ? "+" : "");
   const caldeVisibili = mostraTutteCalde ? calde : calde.slice(0, 3);
   // A + C: lista compatta a scomparsa, aperta da sola se ci sono richiami in ritardo
   const oggiD = oggiISO();
